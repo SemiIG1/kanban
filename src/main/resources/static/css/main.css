@@ -1,0 +1,274 @@
+p, body, td, input, select, button {
+    font-family: -apple-system,system-ui,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    font-size: 14px;
+}
+
+body {
+    padding: 0px;
+    margin: 0px;
+    background-color: #ffffff;
+}
+
+a {
+    color: #1155a3;
+}
+
+.space {
+    margin: 10px 0px 10px 0px;
+}
+
+.header {
+    background: #003267;
+    background: linear-gradient(to right, #011329 0%, #00639e 44%, #011329 100%);
+    padding: 20px 10px;
+    color: white;
+    box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.75);
+}
+
+.header a {
+    color: white;
+}
+
+.header h1 a {
+    text-decoration: none;
+}
+
+.header h1 {
+    padding: 0px;
+    margin: 0px;
+}
+/*
+.main {
+    padding: 10px;
+    margin-top: 20px;
+}
+*/
+
+/* context menu icons */
+.icon:before {
+    position: absolute;
+    left: 0px;
+    margin-left: 8px;
+    margin-top: 3px;
+    width: 14px;
+    height: 14px;
+    content: '';
+}
+
+.icon-blue:before { background-color: #2e78d6; }
+.icon-green:before { background-color: #6aa84f; }
+.icon-yellow:before { background-color: #efb914; }
+.icon-red:before { background-color: #cc4125; }
+
+
+/* columns */
+
+.wrap {
+    display: flex;
+}
+
+.left {
+    margin-right: 10px;
+}
+
+.right {
+    flex-grow: 1;
+}
+
+/* toolbar */
+.toolbar {
+    margin-bottom: 20px;
+}
+
+.toolbar button {
+    display: inline-block;
+    text-align: center;
+    background-color: #3c78d8;
+    border: 1px solid #1155cc;
+    color: #fff;
+    padding: 6px 20px;
+    border-radius: 2px;
+    cursor: pointer;
+    margin-right: 5px;
+    width: 100px;
+    text-decoration: none;
+}
+
+
+
+/* The dropdown container */
+.dropdown {
+    float: left;
+    overflow: hidden;
+}
+
+/* Dropdown button */
+.dropdown .dropbtn {
+    font-size: 16px;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 14px 16px;
+    background-color: inherit;
+    font-family: inherit; /* Important for vertical align on mobile phones */
+    margin: 0; /* Important for vertical align on mobile phones */
+}
+
+/* Add a red background color to navbar links on hover */
+.navbar a:hover, .dropdown:hover .dropbtn {
+    background-color: red;
+}
+
+
+
+/* Dropdown content (hidden by default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+ }
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    float: none;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+/* Add a grey background color to dropdown links on hover */
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* New version of navbar*/
+/* These are currently not used in project */
+.navbar-flex-container {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    font-family: 'Roboto';
+    font-size: 16px;
+
+    font-weight: 500;
+}
+
+.navbar-main {
+    display: flex;
+    align-content: start;
+    align-items: start;
+    justify-content: start;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+.nav-main-item {
+    background-color: #0F0F0F;
+    color: #FFFFFF;
+    padding: 8px;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid;
+}
+
+.nav-main-item:hover {
+    background-color: #232D3F;
+    
+}
+
+
+.navbar-side {
+    display: flex;
+    align-content: start;
+    align-items: start;
+    justify-content: start;
+}
+
+.nav-side-item {
+    padding: 8px;
+    text-align: center;
+    border: 1px solid;
+}
+
+.nav-side-item>button {
+    background-color: #e45353;
+    color: #FFFFFF;
+    width: auto;
+    height: auto;
+}
+
+/* Tables */
+
+table, th, td {
+    border: 1px solid;
+}
+
+th {
+    background-color: #22FD85;
+    color: white;
+}
+
+
+/* Grid container */
+.grid-container {
+    display: grid;
+}
+
+.grid-item {
+
+}
+
+/* Forms */
+* {
+    box-sizing: border-box;
+}
+.container {
+    display: flex;
+    flex-wrap: wrap;
+}
+.main {
+    font-family: Tahoma, Verdena, sans-serif;
+    flex: 50%;
+    padding: 20px;
+}
+
+.main form input {
+    margin-bottom: 20px;
+}
+.side {
+    flex: 50%;
+}
+@media screen and (max-width: 700px) {
+    .container {
+        flex-direction: column;
+    }
+}
+
+/* Team list layout */
+.team-list-grid-container {
+    display: grid;
+    
+    grid-template-columns: auto auto;
+    grid-template-rows: 100px;
+    border: 1px solid;
+}
+.team-list-title {
+    align-items: start;
+    border: 1px solid;
+}
+.team-list-add-team {
+    align-items: end;
+    justify-content: end;
+    border: 1px solid;
+}
