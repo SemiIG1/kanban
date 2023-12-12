@@ -3,8 +3,11 @@ package id.ac.pnj.kanban.config;
 import id.ac.pnj.kanban.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -27,11 +30,11 @@ public class KanbanSecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity httpSecurity,
             AuthenticationSuccessHandler authenticationSuccessHandler) throws Exception {
-        httpSecurity.authorizeHttpRequests(configurer ->
+        httpSecurity.httpBasic(Customizer.withDefaults()).authorizeHttpRequests(configurer ->
                 configurer
-
                         .requestMatchers("/svg/**").permitAll()
                         .requestMatchers("/register/**").permitAll()
+                        .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated()
         ).formLogin(form ->
                 form
@@ -44,6 +47,7 @@ public class KanbanSecurityConfig {
         )
                 // .exceptionHandling(configurer -> configurer.accessDeniedPage("/access-denied"))
         ;
+        httpSecurity.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
         return httpSecurity.build();
     }
 

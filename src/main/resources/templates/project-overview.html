@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
     <title>Title</title>
 </head>
 
@@ -44,7 +44,8 @@
         <div class="row">
             <div class="col-1">
                 <nav class="nav flex-column mt-5">
-                    <a class="nav-link active" aria-current="page" th:href="@{/projects/{projectId}(projectId=${projectId})}">Overview</a>
+                    <a class="nav-link active" aria-current="page"
+                        th:href="@{/projects/{projectId}(projectId=${projectId})}">Overview</a>
                     <a class="nav-link" th:href="@{/projects/{projectId}/tasks(projectId=${projectId})}">Task</a>
                     <a class="nav-link" th:href="@{/projects/{projectId}/files(projectId=${projectId})}">Files</a>
                     <a class="nav-link" th:href="@{/projects/{projectId}/notes(projectId=${projectId})}">Notes</a>
@@ -53,77 +54,65 @@
             <div class="col-1"></div>
             <div class="col-9">
                 <p class="fs-2 fw-bold mt-5">Overview</p>
-                <p class="mt-5">Project: 25%</p>
+                <p id="text-progress" class="mt-5">Project: 25%</p>
                 <div class="progress" role="progressbar" aria-label="Project Progress" aria-valuenow="25"
                     aria-valuemin="0" aria-valuemax="100">
                     <div class="progress-bar" style="width: 25%"></div>
                 </div>
                 <div class="row justify-content-between mt-3 text-center">
-                    <div class="col-3 border">
+                    <div id="to-do-div" class="col-3 border">
                         <p class="mt-3">To do</p>
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                Install Perangkat
-                            </div>
+                        <div th:id="${toDoTask.id}" class="card mb-3" draggable="true"
+                            th:each="toDoTask : ${toDoTasks}">
+
+                            <div class="card-body" th:text="${toDoTask.title}"></div>
                         </div>
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                Remote
-                            </div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                Integrasi
-                            </div>
-                        </div>
+
                     </div>
-                    <div class="col-3 border">
+                    <div id="in-progress-div" class="col-3 border">
                         <p class="mt-3">In Progress</p>
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                Install Perangkat
-                            </div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                Install Perangkat
-                            </div>
+                        <div th:id=" ${inProgressTask.id}" class="card mb-3" draggable="true"
+                            th:each="inProgressTask : ${inProgressTasks}">
+                            <div class="card-body" th:text="${inProgressTask.title}"></div>
                         </div>
                     </div>
-                    <div class="col-3 border">
+                    <div id="done-div" class="col-3 border">
                         <p class="mt-3">Done</p>
+                        <div th:id="${doneTask.id}" class="card mb-3" draggable="true"
+                            th:each="doneTask : ${doneTasks}">
+
+                            <div class="card-body" th:text="${doneTask.title}"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="row mt-3 text-center">
-                        <div class="d-inline-flex flex-row align-items-end">
+                    <div class="d-inline-flex flex-row align-items-end">
+                        <a class="btn btn-primary"
+                            th:href="@{/projects/{projectId}/show-add-member-form(projectId=${projectId})}"> Add
+                            Member</a>
 
-                            <a class="btn btn-primary"
-                               th:href="@{/projects/{projectId}/show-add-member-form(projectId=${projectId})}"> Add
-                                Member</a>
-
-
-                        </div>
+                    </div>
 
                     <table class="table">
                         <thead>
-                        <tr>
-                            <th scope="col"> No</th>
-                            <th scope="col"> Name</th>
-                            <th scope="col"> Role</th>
-                            <th scope="col"> Email</th>
-                            <th scope="col"> Phone</th>
+                            <tr>
+                                <th scope="col"> No</th>
+                                <th scope="col"> Name</th>
+                                <th scope="col"> Role</th>
+                                <th scope="col"> Email</th>
+                                <th scope="col"> Phone</th>
 
-                        </tr>
+                            </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="member : ${members}">
-                            <td th:text="${member.id}" />
-                            <td th:text="${member.name}" />
-                            <td th:text="${member.roles}" />
-                            <td th:text="${member.email}" />
-                            <td th:text="${member.phone}" />
+                            <tr th:each="member : ${members}">
+                                <td th:text="${member.id}" />
+                                <td th:text="${member.name}" />
+                                <td th:text="${member.roles}" />
+                                <td th:text="${member.email}" />
+                                <td th:text="${member.phone}" />
 
-                        </tr>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -144,6 +133,92 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
 
         </script>
+    <script>
+        /* Events fired on the drag target */
+
+        document.addEventListener("dragstart", function (event) {
+
+            event.dataTransfer.setData("Text", event.target.id);
+
+            event.target.style.opacity = "0.4";
+        });
+
+
+        document.addEventListener("drag", function (event) {
+
+        });
+
+        document.addEventListener("dragend", function (event) {
+            event.target.style.opacity = "1";
+
+
+        });
+
+        /* Events fired on the drop target */
+
+        document.addEventListener("dragenter", function (event) {
+            if (event.target.className == "col-3 border") {
+                event.target.style.border = "3px dotted red";
+            }
+        });
+
+        document.addEventListener("dragover", function (event) {
+            event.preventDefault();
+        });
+
+        document.addEventListener("dragleave", function (event) {
+            if (event.target.className == "col-3 border") {
+                event.target.style.border = "";
+            }
+        });
+
+        document.addEventListener("drop", function (event) {
+            event.preventDefault();
+            if (event.target.className == "col-3 border") {
+                event.target.style.border = "";
+                var data = event.dataTransfer.getData("Text");
+                event.target.appendChild(document.getElementById(data));
+                var status;
+                if (event.target.id == "to-do-div") {
+                    status = "To Do";
+                } else if (event.target.id == "in-progress-div") {
+                    status = "In Progress";
+                } else {
+                    status = "Done";
+                }
+                var requestBodyJson = {
+                    id: data,
+                    status: status
+                };
+                $.ajax({
+                    method: "PUT",
+                    url: "http://localhost:8080/api/tasks",
+                    contentType: "application/json",
+                    data: JSON.stringify(requestBodyJson)
+                });
+                /*
+                var url = window.location.href;
+                const splitArray = url.split("/");
+                $.ajax({
+                    method: "GET",
+                    url: "http://localhost:8080/api/projects/" + splitArray[4],
+                    dataType: "json",
+                    success(data) {
+                        var projectResponse = JSON.parse(data);
+                        document.getElementById("text-progress").innerHTML = "Project: " + projectResponse.percentage + "%";
+                        document.getElementsByClassName("progress-bar").style.width = projectResponse.percentage + "%";
+                    }
+                    error(data) {
+                        console.log(data);
+                    }
+                });
+
+                */
+            }
+        });
+
+        /* */
+    </script>
 </body>
 
 </html>

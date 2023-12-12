@@ -54,7 +54,7 @@
 
                         <label class="col-sm-2 col-form-label">Title</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" />
+                            <input type="text" class="form-control" th:field="*{title}"/>
                             <span th:if="${#fields.hasErrors('title')}"
                                   th:errors="*{title}"
                                   class="error"></span>
@@ -66,8 +66,8 @@
 
                         <label class="col-sm-2 col-form-label">Assigned to</label>
                         <div class="col-sm-10">
-                            <select id="statuses" th:field="*{status}">
-                                <option th:each="status : ${statuses}" th:value="${status.name}" th:text="${status.name}" />
+                            <select id="members" th:field="*{member}">
+                                <option th:each="member : ${members}" th:value="${member.name}" th:text="${member.name}" />
                             </select>
 
                         </div>
@@ -77,7 +77,7 @@
 
                         <label class="col-sm-2 col-form-label">Start Date</label>
                         <div class="col-sm-10">
-                            <input type="datetime-local" class="form-control" />
+                            <input type="datetime-local" class="form-control" th:field="*{startDatetime}"/>
                             <span th:if="${#fields.hasErrors('startDatetime')}"
                                   th:errors="*{startDatetime}"
                                   class="error"></span>
@@ -88,10 +88,21 @@
 
                         <label class="col-sm-2 col-form-label">Deadline</label>
                         <div class="col-sm-10">
-                            <input type="datetime-local" class="form-control" />
+                            <input type="datetime-local" class="form-control" th:field="*{deadline}" />
                             <span th:if="${#fields.hasErrors('deadline')}"
                                   th:errors="*{deadline}"
                                   class="error"></span>
+                        </div>
+
+                    </div>
+                    <div class="row mb-3">
+
+                        <label class="col-sm-2 col-form-label">Status</label>
+                        <div class="col-sm-10">
+                            <select id="statuses" th:field="*{status}">
+                                <option th:each="status : ${statuses}" th:value="${status.name}" th:text="${status.name}" />
+                            </select>
+
                         </div>
 
                     </div>

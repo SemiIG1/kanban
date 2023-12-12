@@ -66,6 +66,7 @@
                             <th scope="col"> Assigned to</th>
                             <th scope="col"> Start Date</th>
                             <th scope="col"> Deadline</th>
+                            <th scope="col"> Status</th>
                             <th scope="col"> Edit </th>
                         </tr>
                     </thead>
@@ -73,22 +74,50 @@
                         <tr th:each="task : ${tasks}">
                             <td th:text="${task.id}" />
                             <td th:text="${task.title}" />
-                            <td th:text="${task.startDate}" />
+                            <td th:text="${task.member.name}" />
+                            <td th:text="${task.startDatetime}" />
                             <td th:text="${task.deadline}" />
-                            <td th:text="${task.status}" />
+                            <td th:text="${task.status.name}" />
                             <td>
                                 Edit
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <nav aria-label="Task result pages">
+                <nav aria-label="Tasks result pages" th:if="${totalPages > 1}">
                     <ul class="pagination justify-content-center">
-                        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                        <li class="page-item">
+                            <a class="page-link" aria-label="Previous" th:classappend="${currentPage == 1} ? disabled"
+                               th:href="@{/projects/{projectId}/tasks?page={previousPage}&size=20(previousPage=${currentPage-1},projectId=${projectId})}">
+                                <span> &laquo </span>
+                            </a>
+                        </li>
+                        <li class="page-item" th:if="${currentPage - 2 >= 1}">
+                            <a class="page-link" th:text="${currentPage - 2}"
+                               th:href="@{/projects/{projectId}/tasks?page={previousPage}&size=20(previousPage=${currentPage-2},projectId=${projectId})}" />
+                        </li>
+                        <li class="page-item" th:if="${currentPage - 1 >= 1}">
+                            <a class="page-link" th:text="${currentPage - 1}"
+                               th:href="@{/projects/{projectId}/tasks?page={previousPage}&size=20(previousPage=${currentPage-1},projectId=${projectId})}" />
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link active" th:text="${currentPage}"
+                               th:href="@{/projects/{projectId}/tasks?page={currentPage}&size=20(currentPage=${currentPage},projectId=${projectId})}" />
+                        </li>
+                        <li class="page-item" th:if="${currentPage + 1 <= totalPages}">
+                            <a class="page-link" th:text="${currentPage + 1}"
+                               th:href="@{/projects/{projectId}/tasks?page={nextPage}&size=20(nextPage=${currentPage+1},projectId=${projectId})}" />
+                        </li>
+                        <li class="page-item" th:if="${currentPage + 2 <= totalPages}">
+                            <a class="page-link" th:text="${currentPage + 2}"
+                               th:href="@{/projects/{projectId}/tasks?page={nextPage}&size=20(nextPage=${currentPage+2},projectId=${projectId})}" />
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" aria-label="Next" th:classappend="${currentPage == totalPages} ? disabled"
+                               th:href="@{/projects/{projectId}/tasks?page={nextPage}&size=20(nextPage=${currentPage+1},projectId=${projectId})}">
+                                <span> &raquo </span>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
             </div>

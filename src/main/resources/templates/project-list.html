@@ -73,13 +73,40 @@
             </tr>
             </tbody>
         </table>
-        <nav aria-label="Project result pages">
+        <nav aria-label="Projects result pages" th:if="${totalPages > 1}">
             <ul class="pagination justify-content-center">
-                <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                <li class="page-item">
+                    <a class="page-link" aria-label="Previous" th:classappend="${currentPage == 1} ? disabled"
+                       th:href="@{/projects?page={previousPage}&size=20(previousPage=${currentPage-1})}">
+                        <span> &laquo </span>
+                    </a>
+                </li>
+                <li class="page-item" th:if="${currentPage - 2 >= 1}">
+                    <a class="page-link" th:text="${currentPage - 2}"
+                       th:href="@{/projects?page={previousPage}&size=20(previousPage=${currentPage-2})}" />
+                </li>
+                <li class="page-item" th:if="${currentPage - 1 >= 1}">
+                    <a class="page-link" th:text="${currentPage - 1}"
+                       th:href="@{/projects?page={previousPage}&size=20(previousPage=${currentPage-1})}" />
+                </li>
+                <li class="page-item">
+                    <a class="page-link active" th:text="${currentPage}"
+                       th:href="@{/projects?page={currentPage}&size=20(currentPage=${currentPage})}" />
+                </li>
+                <li class="page-item" th:if="${currentPage + 1 <= totalPages}">
+                    <a class="page-link" th:text="${currentPage + 1}"
+                       th:href="@{/projects?page={nextPage}&size=20(nextPage=${currentPage+1})}" />
+                </li>
+                <li class="page-item" th:if="${currentPage + 2 <= totalPages}">
+                    <a class="page-link" th:text="${currentPage + 2}"
+                       th:href="@{/projects?page={nextPage}&size=20(nextPage=${currentPage+2})}" />
+                </li>
+                <li class="page-item">
+                    <a class="page-link" aria-label="Next" th:classappend="${currentPage == totalPages} ? disabled"
+                       th:href="@{/projects?page={nextPage}&size=20(nextPage=${currentPage+1})}">
+                        <span> &raquo </span>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>

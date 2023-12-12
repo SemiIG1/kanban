@@ -24,19 +24,25 @@ public class TaskDTO {
     @NotNull
     private String title;
 
+    @NotNull
+    private String member;
 
     private LocalDateTime startDatetime;
 
 
     private LocalDateTime deadline;
 
+    @NotNull
+    private String status;
+
     public TaskDTO() {
     }
 
-    public TaskDTO(String title, LocalDateTime startDatetime, LocalDateTime deadline) {
+    public TaskDTO(String title, LocalDateTime startDatetime, LocalDateTime deadline, String status) {
         this.title = title;
         this.startDatetime = startDatetime;
         this.deadline = deadline;
+        this.status = status;
     }
 
     public int getId() {
@@ -55,6 +61,14 @@ public class TaskDTO {
         this.title = title;
     }
 
+    public String getMember() {
+        return member;
+    }
+
+    public void setMember(String member) {
+        this.member = member;
+    }
+
     public LocalDateTime getStartDatetime() {
         return startDatetime;
     }
@@ -69,5 +83,13 @@ public class TaskDTO {
 
     public void setDeadline(LocalDateTime deadline) {
         this.deadline = deadline;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

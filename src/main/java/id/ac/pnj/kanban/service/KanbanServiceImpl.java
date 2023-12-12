@@ -1,8 +1,10 @@
 package id.ac.pnj.kanban.service;
 
+import com.blazebit.persistence.PagedList;
 import id.ac.pnj.kanban.dao.KanbanDao;
 import id.ac.pnj.kanban.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,13 +18,28 @@ public class KanbanServiceImpl implements KanbanService {
     }
 
     @Override
-    public List<Announcement> findAllAnnouncements() {
-        return kanbanDao.findAllAnnouncements();
+    public PagedList<Announcement> findAllAnnouncements(Pageable pageable) {
+        return kanbanDao.findAllAnnouncements(pageable);
+    }
+
+    @Override
+    public Announcement findAnnouncementById(int id) {
+        return kanbanDao.findAnnouncementById(id);
+    }
+
+    @Override
+    public List<Task> findAllDoneTasksByProjectId(int id) {
+        return kanbanDao.findAllDoneTasksByProjectId(id);
     }
 
     @Override
     public List<File> findAllFilesByProjectId(int id) {
         return kanbanDao.findAllFilesByProjectId(id);
+    }
+
+    @Override
+    public List<Task> findAllInProgressTasksByProjectId(int id) {
+        return kanbanDao.findAllInProgressTasksByProjectId(id);
     }
 
     @Override
@@ -41,13 +58,13 @@ public class KanbanServiceImpl implements KanbanService {
     }
 
     @Override
-    public List<Note> findAllNotesByProjectId(int id) {
-        return kanbanDao.findAllNotesByProjectId(id);
+    public PagedList<Note> findAllNotesByProjectId(int id, Pageable pageable) {
+        return kanbanDao.findAllNotesByProjectId(id, pageable);
     }
 
     @Override
-    public List<Project> findAllProjects() {
-        return kanbanDao.findAllProjects();
+    public PagedList<Project> findAllProjects(Pageable pageable) {
+        return kanbanDao.findAllProjects(pageable);
     }
 
     @Override
@@ -61,8 +78,33 @@ public class KanbanServiceImpl implements KanbanService {
     }
 
     @Override
+    public List<Task> findAllToDoTasksByProjectId(int id) {
+        return kanbanDao.findAllToDoTasksByProjectId(id);
+    }
+
+    @Override
+    public PagedList<Task> findAllTasksByProjectId(int id, Pageable pageable) {
+        return kanbanDao.findAllTasksByProjectId(id, pageable);
+    }
+
+    @Override
     public List<Role> findAllRoles() {
         return kanbanDao.findAllRoles();
+    }
+
+    @Override
+    public File findFileById(int id) {
+        return null;
+    }
+
+    @Override
+    public Member findMemberByName(String name) {
+        return kanbanDao.findMemberByName(name);
+    }
+
+    @Override
+    public Note findNoteById(int id) {
+        return null;
     }
 
     @Override
@@ -71,8 +113,18 @@ public class KanbanServiceImpl implements KanbanService {
     }
 
     @Override
+    public Double findProjectProgressById(int id) {
+        return kanbanDao.findProjectProgressById(id);
+    }
+
+    @Override
     public Status findStatusByName(String name) {
         return kanbanDao.findStatusByName(name);
+    }
+
+    @Override
+    public Task findTaskById(int id) {
+        return kanbanDao.findTaskById(id);
     }
 
     @Override

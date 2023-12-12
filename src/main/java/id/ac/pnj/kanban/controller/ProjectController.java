@@ -1,5 +1,6 @@
 package id.ac.pnj.kanban.controller;
 
+import com.blazebit.persistence.PagedList;
 import id.ac.pnj.kanban.dto.NoteDTO;
 import id.ac.pnj.kanban.dto.ProjectDTO;
 import id.ac.pnj.kanban.dto.TaskDTO;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,6 +27,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -58,7 +62,8 @@ public class ProjectController {
     public String saveMember(@ModelAttribute("member") Member member,
             @PathVariable int projectId) {
         Project project = kanbanService.findProjectById(projectId);
-        project.addMember(member);
+        Member foundMember = kanbanService.findMemberByName(member.getName());
+        project.addMember(foundMember);
         kanbanService.save(project);
         return "redirect:/projects/" + projectId;
 
@@ -109,15 +114,16 @@ public class ProjectController {
     public String saveTask(
             @Valid @ModelAttribute("task") TaskDTO taskDTO,
             @PathVariable int projectId,
-            BindingResult bindingResult,
-            Principal principal) {
+            BindingResult bindingResult){
         if (bindingResult.hasErrors()) {
-            return "note-form";
+            return "task-form";
         }
         else {
-            Member currentLoggedInMember = userService.findUserByEmail(principal.getName());
             Task task = new Task(taskDTO.getTitle(), taskDTO.getStartDatetime(), taskDTO.getDeadline());
-            task.setMember(currentLoggedInMember);
+            Member selectedMember = kanbanService.findMemberByName(taskDTO.getMember());
+            task.setMember(selectedMember);
+            Status initialStatus = kanbanService.findStatusByName(taskDTO.getStatus());
+            task.setStatus(initialStatus);
             Project project = kanbanService.findProjectById(projectId);
             task.setProject(project);
             kanbanService.save(task);
@@ -162,7 +168,10 @@ public class ProjectController {
     @GetMapping("/projects/{projectId}/tasks/show-add-task-form")
     public String showAddTaskForm(@PathVariable int projectId, Model model) {
         Task task = new Task();
-
+        List<Member> members = kanbanService.findAllMembersByProjectId(projectId);
+        List<Status> statuses = kanbanService.findAllStatuses();
+        model.addAttribute("members", members);
+        model.addAttribute("statuses", statuses);
         model.addAttribute("task", task);
 
         return "task-form";
@@ -180,19 +189,31 @@ public class ProjectController {
         return "file-list";
     }
     @GetMapping("/projects/{projectId}/notes")
-    public String showNoteList(@PathVariable int projectId, Model model) {
-        List<Note> notes = kanbanService.findAllNotesByProjectId(projectId);
+    public String showNoteList(@PathVariable int projectId, Model model,
+                               @RequestParam(value = "page") Optional<Integer> page,
+                               @RequestParam(value = "size") Optional<Integer> size) {
+        int currentPage = page.orElse(1);
+        int pageSize = size.orElse(20);
+        PagedList<Note> notes = kanbanService
+                .findAllNotesByProjectId(projectId, PageRequest.of(currentPage - 1, pageSize));
 
+        model.addAttribute("currentPage", currentPage);
         model.addAttribute("notes", notes);
         model.addAttribute("projectId", projectId);
+        model.addAttribute("totalPages", notes.getTotalPages());
         return "note-list";
     }
 
     @GetMapping("/projects")
-    public String showProjectList(Model model) {
-        List<Project> projects = kanbanService.findAllProjects();
+    public String showProjectList(Model model,
+                                  @RequestParam(value = "page") Optional<Integer> page,
+                                  @RequestParam(value = "size") Optional<Integer> size) {
+        int currentPage = page.orElse(1);
+        int pageSize = size.orElse(20);
+        PagedList<Project> projects = kanbanService.findAllProjects(PageRequest.of(currentPage - 1, pageSize));
+        model.addAttribute("currentPage", currentPage);
         model.addAttribute("projects", projects);
-
+        model.addAttribute("totalPages", projects.getTotalPages());
         return "project-list";
     }
 
@@ -207,18 +228,30 @@ public class ProjectController {
     @GetMapping("/projects/{projectId}")
     public String showProjectOverview(@PathVariable int projectId, Model model) {
         List<Member> members = kanbanService.findAllMembersByProjectId(projectId);
+        List<Task> doneTasks = kanbanService.findAllDoneTasksByProjectId(projectId);
+        List<Task> inProgressTasks = kanbanService.findAllInProgressTasksByProjectId(projectId);
+        List<Task> toDoTasks = kanbanService.findAllToDoTasksByProjectId(projectId);
+
+        model.addAttribute("doneTasks", doneTasks);
+        model.addAttribute("inProgressTasks", inProgressTasks);
         model.addAttribute("members", members);
         model.addAttribute("projectId", projectId);
+        model.addAttribute("toDoTasks", toDoTasks);
+
         return "project-overview";
     }
 
     @GetMapping("/projects/{projectId}/tasks")
-    public String showTaskList(@PathVariable int projectId, Model model) {
-        List<Task> tasks = kanbanService.findAllTasksByProjectId(projectId);
+    public String showTaskList(@PathVariable int projectId, Model model,
+                               @RequestParam(value = "page") Optional<Integer> page,
+                               @RequestParam(value = "size") Optional<Integer> size) {
+        int currentPage = page.orElse(1);
+        int pageSize = size.orElse(20);
+        PagedList<Task> tasks = kanbanService.findAllTasksByProjectId(projectId, PageRequest.of(currentPage - 1, pageSize));
+        model.addAttribute("currentPage", currentPage);
         model.addAttribute("projectId", projectId);
         model.addAttribute("tasks", tasks);
-
-
+        model.addAttribute("totalPages", tasks.getTotalPages());
         return "task-list";
     }
 }
