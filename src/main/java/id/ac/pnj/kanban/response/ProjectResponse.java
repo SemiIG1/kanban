@@ -1,20 +1,20 @@
 package id.ac.pnj.kanban.response;
 
 public class ProjectResponse {
-    private Double percentage;
+    private int percentage;
 
     public ProjectResponse() {
     }
 
-    public ProjectResponse(Double percentage) {
+    public ProjectResponse(int percentage) {
         this.percentage = percentage;
     }
 
-    public Double getPercentage() {
+    public int getPercentage() {
         return percentage;
     }
 
-    public void setPercentage(Double percentage) {
+    public void setPercentage(int percentage) {
         this.percentage = percentage;
     }
 }

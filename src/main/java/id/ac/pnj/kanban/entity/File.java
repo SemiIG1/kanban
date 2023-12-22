@@ -16,17 +16,28 @@ public class File {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
-    private LocalDateTime datetime;
+    @JoinColumn(name = "created_at")
+    private LocalDateTime createdAt;
 
     private String path;
+
+    private int size;
 
     public File() {
 
     }
 
-    public File(String path, LocalDateTime datetime) {
+    public File(String path, LocalDateTime createdAt) {
         this.path = path;
-        this.datetime = datetime;
+        this.createdAt = createdAt;
+    }
+
+    public File(int id, Project project, Member member, LocalDateTime createdAt, String path) {
+        this.id = id;
+        this.project = project;
+        this.member = member;
+        this.createdAt = createdAt;
+        this.path = path;
     }
 
     public int getId() {
@@ -53,12 +64,12 @@ public class File {
         this.member = member;
     }
 
-    public LocalDateTime getDatetime() {
-        return datetime;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setDatetime(LocalDateTime datetime) {
-        this.datetime = datetime;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getPath() {
@@ -67,5 +78,13 @@ public class File {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 }

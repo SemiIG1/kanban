@@ -18,6 +18,31 @@ public class KanbanServiceImpl implements KanbanService {
     }
 
     @Override
+    public void deleteAnnouncementById(int id) {
+        kanbanDao.deleteAnnouncementById(id);
+    }
+
+    @Override
+    public void deleteEventById(int id) {
+        kanbanDao.deleteEventById(id);
+    }
+
+    @Override
+    public void deleteProjectById(int id) {
+        kanbanDao.deleteProjectById(id);
+    }
+
+    @Override
+    public void deleteNoteById(int id) {
+        kanbanDao.deleteNoteById(id);
+    }
+
+    @Override
+    public void deleteTaskById(int id) {
+        kanbanDao.deleteTaskById(id);
+    }
+
+    @Override
     public PagedList<Announcement> findAllAnnouncements(Pageable pageable) {
         return kanbanDao.findAllAnnouncements(pageable);
     }
@@ -31,6 +56,10 @@ public class KanbanServiceImpl implements KanbanService {
     public List<Task> findAllDoneTasksByProjectId(int id) {
         return kanbanDao.findAllDoneTasksByProjectId(id);
     }
+    @Override
+    public List<Event> findAllEvents() {
+        return kanbanDao.findAllEvents();
+    }
 
     @Override
     public List<File> findAllFilesByProjectId(int id) {
@@ -43,12 +72,12 @@ public class KanbanServiceImpl implements KanbanService {
     }
 
     @Override
-    public List<Member> findAllMembersByProjectId(int id) {
+    public List<Object[]> findAllMembersByProjectId(int id) {
         return kanbanDao.findAllMembersByProjectId(id);
     }
 
     @Override
-    public List<Member> findAllMembersNotInProjectWithProjectId(int id) {
+    public List<Object[]> findAllMembersNotInProjectWithProjectId(int id) {
         return kanbanDao.findAllMembersNotInProjectWithProjectId(id);
     }
 
@@ -93,8 +122,18 @@ public class KanbanServiceImpl implements KanbanService {
     }
 
     @Override
+    public Event findEventById(int id) {
+        return kanbanDao.findEventById(id);
+    }
+
+    @Override
     public File findFileById(int id) {
-        return null;
+        return kanbanDao.findFileById(id);
+    }
+
+    @Override
+    public List<Task> findFirst3TasksOrderedByUpdatedAtDesc() {
+        return kanbanDao.findFirst3TasksOrderedByUpdatedAtDesc();
     }
 
     @Override
@@ -104,7 +143,7 @@ public class KanbanServiceImpl implements KanbanService {
 
     @Override
     public Note findNoteById(int id) {
-        return null;
+        return kanbanDao.findNoteById(id);
     }
 
     @Override
@@ -113,7 +152,7 @@ public class KanbanServiceImpl implements KanbanService {
     }
 
     @Override
-    public Double findProjectProgressById(int id) {
+    public int findProjectProgressById(int id) {
         return kanbanDao.findProjectProgressById(id);
     }
 
@@ -130,6 +169,11 @@ public class KanbanServiceImpl implements KanbanService {
     @Override
     public void save(Announcement announcement) {
         kanbanDao.save(announcement);
+    }
+
+    @Override
+    public void save(Event event) {
+        kanbanDao.save(event);
     }
 
     @Override

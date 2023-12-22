@@ -33,7 +33,7 @@
             </div>
             <div class="d-flex">
                 <i class="bi bi-person-circle"></i>
-                <p class="text-light">Patar Marpaung</p>
+                <p class="text-light"><span sec:authentication="name"></span></p>
                 <form action="#" th:action="@{/logout}" method="POST">
                     <button type="submit" class="btn btn-danger">Logout</button>
                 </form>
@@ -48,7 +48,7 @@
             <div class="col-6 border">
                 <form action="#" th:action="@{/projects/{projectId}/notes/show-add-note-form/save(projectId=${projectId})}"
                       th:object="${note}" method="POST">
-                    <input type="hidden" th:field="*{id}"/>
+                    <input type="hidden" name="noteId" th:field="*{id}"/>
                     <div class="row mt-3 mb-3">
                         <label class="col-sm-2 col-form-label">Message</label>
                         <div class="col-sm-10">
@@ -60,7 +60,8 @@
                     </div>
 
                     <div class="d-flex justify-content-end mb-3">
-                        <button class="btn btn-primary"> Add Note</button>
+                        <button class="btn btn-primary" type="submit"
+                                th:text="${note.id} ? 'Edit Note': 'Add Note'"> </button>
                     </div>
                 </form>
             </div>

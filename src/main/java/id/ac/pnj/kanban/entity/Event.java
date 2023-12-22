@@ -1,5 +1,6 @@
 package id.ac.pnj.kanban.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -7,22 +8,24 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "note")
-public class Note {
+@Table(name = "event")
+public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @ManyToOne
-    @JoinColumn(name = "project_id")
-    private Project project;
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "created_by")
     private Member createdBy;
-
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "updated_by")
+
     private Member updatedBy;
-    private String message;
+    private String title;
+    private String description;
+    private LocalDateTime start;
+
+    @Column(name = "finish")
+    private LocalDateTime end;
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -30,13 +33,14 @@ public class Note {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public Note() {
-
+    public Event() {
     }
 
-    public Note(String message, LocalDateTime createdAt) {
-        this.message = message;
-        this.createdAt = createdAt;
+    public Event(String title, String description, LocalDateTime start, LocalDateTime end) {
+        this.title = title;
+        this.description = description;
+        this.start = start;
+        this.end = end;
     }
 
     public int getId() {
@@ -45,14 +49,6 @@ public class Note {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
     }
 
     public Member getCreatedBy() {
@@ -71,12 +67,36 @@ public class Note {
         this.updatedBy = updatedBy;
     }
 
-    public String getMessage() {
-        return message;
+    public String getTitle() {
+        return title;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDateTime getStart() {
+        return start;
+    }
+
+    public void setStart(LocalDateTime start) {
+        this.start = start;
+    }
+
+    public LocalDateTime getEnd() {
+        return end;
+    }
+
+    public void setEnd(LocalDateTime end) {
+        this.end = end;
     }
 
     public LocalDateTime getCreatedAt() {

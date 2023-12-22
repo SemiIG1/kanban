@@ -58,7 +58,10 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-end mb-3">
-                        <button class="btn btn-primary" type="submit"> Add Announcement</button>
+                        <button class="btn btn-primary" type="submit"
+                                th:text="${announcement.id} ? 'Edit Announcement': 'Add Announcement'"> </button>
+
+
                     </div>
                 </form>
             </div>

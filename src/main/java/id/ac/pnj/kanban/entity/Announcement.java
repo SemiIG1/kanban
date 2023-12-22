@@ -1,6 +1,8 @@
 package id.ac.pnj.kanban.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -12,18 +14,30 @@ public class Announcement {
     private int id;
 
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "created_by")
+    private Member createdBy;
+
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "updated_by")
+    private Member updatedBy;
     private String message;
-    private LocalDateTime datetime;
+
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+
+    private LocalDateTime createdAt;
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     public Announcement() {
 
     }
 
-    public Announcement(String message, LocalDateTime date) {
+    public Announcement(String message, LocalDateTime createdAt) {
         this.message = message;
-        this.datetime = date;
+        this.createdAt = createdAt;
     }
 
     public int getId() {
@@ -34,12 +48,20 @@ public class Announcement {
         this.id = id;
     }
 
-    public Member getMember() {
-        return member;
+    public Member getCreatedBy() {
+        return createdBy;
     }
 
-    public void setMember(Member member) {
-        this.member = member;
+    public void setCreatedBy(Member createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Member getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(Member updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
     public String getMessage() {
@@ -50,11 +72,19 @@ public class Announcement {
         this.message = message;
     }
 
-    public LocalDateTime getDatetime() {
-        return datetime;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setDatetime(LocalDateTime datetime) {
-        this.datetime = datetime;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

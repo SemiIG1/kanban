@@ -1,6 +1,7 @@
 package id.ac.pnj.kanban.storage;
 
 import id.ac.pnj.kanban.dao.KanbanDao;
+import id.ac.pnj.kanban.dto.FileDTO;
 import id.ac.pnj.kanban.entity.File;
 import id.ac.pnj.kanban.entity.Member;
 import id.ac.pnj.kanban.entity.Project;
@@ -10,6 +11,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +20,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -47,6 +52,10 @@ public class FileSystemStorageService implements StorageService {
 					Paths.get(file.getOriginalFilename()))
 					.normalize().toAbsolutePath();
 			System.out.println(destinationFile);
+			double fileSize = 0;
+
+			System.out.println("File size: " + fileSize);
+
 			if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
 				// This is a security check
 				throw new StorageException(
@@ -57,6 +66,7 @@ public class FileSystemStorageService implements StorageService {
 					StandardCopyOption.REPLACE_EXISTING);
 			}
 			File fileEntity = new File(destinationFile.toString(), LocalDateTime.now());
+			fileEntity.setSize((int) file.getSize());
 			Project projectEntity = kanbanDao.findProjectById(projectId);
 			fileEntity.setProject(projectEntity);
 			fileEntity.setMember(member);
@@ -69,6 +79,7 @@ public class FileSystemStorageService implements StorageService {
 
 	@Override
 	public Stream<Path> loadAll() {
+
 		try {
 			return Files.walk(this.rootLocation, 1)
 				.filter(path -> !path.equals(this.rootLocation))
@@ -79,6 +90,46 @@ public class FileSystemStorageService implements StorageService {
 		}
 
 	}
+
+	@Override
+	public Stream<FileDTO> loadAllFilesFromDatabaseByProjectId(int id) {
+		List<File> files = kanbanDao.findAllFilesByProjectId(id);
+		Stream<FileDTO> fileDTOList = files.stream().map(
+				file -> {
+					if (Files.exists(Paths.get(file.getPath()))) {
+						System.out.println("File in " + file.getPath() + " exists");
+					}
+
+					FileDTO fileDTO = new FileDTO();
+					fileDTO.setId(file.getId());
+
+					fileDTO.setPath(file.getPath());
+					fileDTO.setCreatedAt(file.getCreatedAt());
+					fileDTO.setCreatedBy(file.getMember().getName());
+					StringBuilder stringBuilder = new StringBuilder();
+					DecimalFormat decimalFormat = new DecimalFormat("#.#");
+					double fileSize = 0;
+					if (file.getSize() > 1048576) {
+						fileSize = (double) file.getSize() / 1048576;
+
+						stringBuilder.append(decimalFormat.format(fileSize));
+						stringBuilder.append(" MB");
+					} else if (file.getSize() > 1024) {
+						fileSize = (double) file.getSize() / 1024;
+						stringBuilder.append(decimalFormat.format(fileSize));
+						stringBuilder.append(" KB");
+					} else {
+						fileSize = file.getSize();
+						stringBuilder.append(fileSize);
+						stringBuilder.append(" bytes");
+					}
+					fileDTO.setSize(stringBuilder.toString());
+					return fileDTO;
+				}
+		);
+		return fileDTOList;
+	}
+
 
 	@Override
 	public Path load(String filename) {
@@ -106,8 +157,22 @@ public class FileSystemStorageService implements StorageService {
 
 	@Override
 	public void deleteAll() {
+
 		FileSystemUtils.deleteRecursively(rootLocation.toFile());
+
 	}
+
+	@Override
+	public void deleteFileById(int id) {
+		File file = kanbanDao.findFileById(id);
+		try {
+			Files.deleteIfExists(Paths.get(file.getPath()));
+		} catch (Exception e) {
+			throw new StorageFileNotFoundException("Could not delete file");
+		}
+		kanbanDao.deleteFileById(id);
+	}
+
 
 	@Override
 	public void init() {

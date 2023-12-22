@@ -42,7 +42,12 @@ public class AnnouncementController {
 
         dataBinder.registerCustomEditor(String.class, stringTrimmerEditor);
     }
+    @PostMapping("/announcements/delete")
+    public String deleteAnnouncement(@RequestParam("announcementId") int announcementId) {
+        kanbanService.deleteAnnouncementById(announcementId);
+        return "redirect:/announcements";
 
+    }
     @PostMapping("/announcements/save")
     public String saveAnnouncement(
             @Valid @ModelAttribute("announcement") AnnouncementDTO announcementDTO,
@@ -55,8 +60,16 @@ public class AnnouncementController {
         }
         else {
             Member currentLoggedInMember = userService.findUserByEmail(principal.getName());
-            Announcement announcement = new Announcement(announcementDTO.getMessage(), LocalDateTime.now());
-            announcement.setMember(currentLoggedInMember);
+            Announcement announcement;
+            if (announcementDTO.getId() == 0) {
+                announcement = new Announcement(announcementDTO.getMessage(), LocalDateTime.now());
+                announcement.setId(announcementDTO.getId());
+                announcement.setCreatedBy(currentLoggedInMember);
+            } else {
+                announcement = kanbanService.findAnnouncementById(announcementDTO.getId());
+                announcement.setMessage(announcementDTO.getMessage());
+                announcement.setUpdatedBy(currentLoggedInMember);
+            }
             kanbanService.save(announcement);
             return "redirect:/announcements";
         }
@@ -81,7 +94,7 @@ public class AnnouncementController {
     }
     @GetMapping("/announcements/show-add-announcement-form")
     public String showAddAnnouncementForm(Model model) {
-        Announcement announcement = new Announcement();
+        AnnouncementDTO announcement = new AnnouncementDTO();
         List<Status> statuses = kanbanService.findAllStatuses();
         model.addAttribute("announcement", announcement);
         model.addAttribute("statuses", statuses);
@@ -89,8 +102,11 @@ public class AnnouncementController {
     }
 
     @PostMapping("/announcements/show-update-announcement-form")
-    public String showupdateAnnouncementForm(@RequestParam("announcementId") int announcementId, Model model) {
-
+    public String showUpdateAnnouncementForm(@RequestParam("announcementId") int announcementId, Model model) {
+        Announcement announcement = kanbanService.findAnnouncementById(announcementId);
+        AnnouncementDTO announcementDTO = new AnnouncementDTO(announcement.getMessage());
+        announcementDTO.setId(announcementId);
+        model.addAttribute("announcement", announcement);
         return "announcement-form";
     }
 

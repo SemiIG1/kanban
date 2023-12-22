@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -51,28 +49,54 @@
         </div>
         <table class="table">
             <thead>
-            <tr>
-                <th scope="col">
-                    No
-                </th>
-                <th scope="col">
-                    Message
-                </th>
-                <th scope="col">
-                    Created By
-                </th>
-                <th scope="col">
-                    Datetime
-                </th>
-            </tr>
+                <tr>
+                    <th scope="col">
+                        No
+                    </th>
+                    <th scope="col">
+                        Message
+                    </th>
+                    <th scope="col">
+                        Created By
+                    </th>
+                    <th scope="col">
+                        Created At
+                    </th>
+                    <th scope="col">
+                        Updated By
+                    </th>
+                    <th scope="col">
+                        Updated At
+                    </th>
+                    <th sec:authorize="hasRole('PROJECT_MANAGER')" scope="col">
+                        Edit
+                    </th>
+                </tr>
             </thead>
             <tbody>
-            <tr th:each="announcement : ${announcements}">
-                <td th:text="${announcement.id}"/>
-                <td th:text="${announcement.message}"/>
-                <td th:text="${announcement.member.name}"/>
-                <td th:text="${announcement.datetime}"/>
-            </tr>
+                <tr th:each="announcement : ${announcements}">
+                    <td th:text="${announcement.id}" />
+                    <td th:text="${announcement.message}" />
+                    <td th:text="${announcement.createdBy.name}" />
+                    <td th:text="${announcement.createdAt}" />
+                    <td th:text="${announcement.updatedBy} ? ${announcement.updatedBy.name} : '-'" />
+                    <td th:text="${announcement.updatedAt} ? ${announcement.updatedAt} : '-'" />
+
+                    <td sec:authorize="hasRole('PROJECT_MANAGER')">
+                        <div class="d-flex">
+                            <form action="#" th:action="@{/announcements/show-update-announcement-form}" method="POST">
+                                <input type="hidden" name="announcementId" th:value="${announcement.id}">
+                                <button type="submit" class="btn btn-primary">Edit</button>
+                            </form>
+                            <form action="#" th:action="@{/announcements/delete}" method="POST">
+                                <input type="hidden" name="announcementId" th:value="${announcement.id}">
+                                <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Are you sure you want to delete this note?')">Delete</button>
+                            </form>
+
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
 
@@ -80,33 +104,33 @@
             <ul class="pagination justify-content-center">
                 <li class="page-item">
                     <a class="page-link" aria-label="Previous" th:classappend="${currentPage == 1} ? disabled"
-                       th:href="@{/announcements?page={previousPage}&size=20(previousPage=${currentPage-1})}">
+                        th:href="@{/announcements?page={previousPage}&size=20(previousPage=${currentPage-1})}">
                         <span> &laquo </span>
                     </a>
                 </li>
                 <li class="page-item" th:if="${currentPage - 2 >= 1}">
                     <a class="page-link" th:text="${currentPage - 2}"
-                       th:href="@{/announcements?page={previousPage}&size=20(previousPage=${currentPage-2})}" />
+                        th:href="@{/announcements?page={previousPage}&size=20(previousPage=${currentPage-2})}" />
                 </li>
                 <li class="page-item" th:if="${currentPage - 1 >= 1}">
                     <a class="page-link" th:text="${currentPage - 1}"
-                       th:href="@{/announcements?page={previousPage}&size=20(previousPage=${currentPage-1})}" />
+                        th:href="@{/announcements?page={previousPage}&size=20(previousPage=${currentPage-1})}" />
                 </li>
                 <li class="page-item">
                     <a class="page-link active" th:text="${currentPage}"
-                       th:href="@{/announcements?page={currentPage}&size=20(currentPage=${currentPage})}" />
+                        th:href="@{/announcements?page={currentPage}&size=20(currentPage=${currentPage})}" />
                 </li>
                 <li class="page-item" th:if="${currentPage + 1 <= totalPages}">
                     <a class="page-link" th:text="${currentPage + 1}"
-                       th:href="@{/announcements?page={nextPage}&size=20(nextPage=${currentPage+1})}" />
+                        th:href="@{/announcements?page={nextPage}&size=20(nextPage=${currentPage+1})}" />
                 </li>
                 <li class="page-item" th:if="${currentPage + 2 <= totalPages}">
                     <a class="page-link" th:text="${currentPage + 2}"
-                       th:href="@{/announcements?page={nextPage}&size=20(nextPage=${currentPage+2})}" />
+                        th:href="@{/announcements?page={nextPage}&size=20(nextPage=${currentPage+2})}" />
                 </li>
                 <li class="page-item">
                     <a class="page-link" aria-label="Next" th:classappend="${currentPage == totalPages} ? disabled"
-                       th:href="@{/announcements?page={nextPage}&size=20(nextPage=${currentPage+1})}">
+                        th:href="@{/announcements?page={nextPage}&size=20(nextPage=${currentPage+1})}">
                         <span> &raquo </span>
                     </a>
                 </li>
@@ -115,12 +139,30 @@
 
 
     </div>
+    <div class="modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
 
         </script>
+
 </body>
 
 </html>

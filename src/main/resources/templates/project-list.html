@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -20,7 +18,7 @@
         <div class="container-fluid">
             <span class="navbar-brand">Project Management</span>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
-                    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
@@ -34,7 +32,7 @@
             </div>
             <div class="d-flex">
                 <i class="bi bi-person-circle"></i>
-                <p class="text-light">Patar Marpaung</p>
+                <p class="text-light"><span sec:authentication="name"></span></p>
                 <form action="#" th:action="@{/logout}" method="POST">
                     <button type="submit" class="btn btn-danger">Logout</button>
                 </form>
@@ -51,59 +49,74 @@
         </div>
         <table class="table">
             <thead>
-            <tr>
-                <th scope="col"> No</th>
-                <th scope="col"> Project</th>
-                <th scope="col"> Customer</th>
-                <th scope="col"> Start Update</th>
-                <th scope="col"> Deadline</th>
-                <th scope="col"> Progress</th>
-                <th scope="col"> Status</th>
-            </tr>
+                <tr>
+                    <th scope="col"> No</th>
+                    <th scope="col"> Project</th>
+                    <th scope="col"> Customer</th>
+                    <th scope="col"> Start Update</th>
+                    <th scope="col"> Deadline</th>
+                    <th scope="col"> Progress</th>
+                    <th scope="col"> Status</th>
+                    <th sec:authorize="hasRole('PROJECT_MANAGER')" scope="col"> Edit</th>
+
+                </tr>
             </thead>
             <tbody>
-            <tr th:each="project : ${projects}">
-                <td th:text="${project.id}" />
-                <td> <a th:text="${project.project}" th:href="@{'/projects/' + ${project.id}}"></a> </td>
-                <td th:text="${project.customer}" />
-                <td th:text="${project.startUpdate}" />
-                <td th:text="${project.deadline}" />
-                <td th:text="${project.progress}" >%</td>
-                <td th:text="${project.status.name}" />
-            </tr>
+                <tr th:each="project : ${projects}">
+                    <td th:text="${project.id}" />
+                    <td> <a th:text="${project.project}" th:href="@{'/projects/' + ${project.id}}"></a> </td>
+                    <td th:text="${project.customer}" />
+                    <td th:text="${project.startUpdate}" />
+                    <td th:text="${project.deadline}" />
+                    <td th:text="${project.progress}">%</td>
+                    <td th:text="${project.status.name}" />
+                    <td sec:authorize="hasRole('PROJECT_MANAGER')">
+                        <div class="d-flex">
+                            <form action="#" th:action="@{/projects/show-update-project-form}" method="POST">
+                                <input type="hidden" name="projectId" th:value="${project.id}">
+                                <button type="submit" class="btn btn-primary">Edit</button>
+                            </form>
+                            <form action="#" th:action="@{/projects/delete}" method="POST">
+                                <input type="hidden" name="projectId" th:value="${project.id}">
+                                <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Are you sure you want to delete this project?')">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
         <nav aria-label="Projects result pages" th:if="${totalPages > 1}">
             <ul class="pagination justify-content-center">
                 <li class="page-item">
                     <a class="page-link" aria-label="Previous" th:classappend="${currentPage == 1} ? disabled"
-                       th:href="@{/projects?page={previousPage}&size=20(previousPage=${currentPage-1})}">
+                        th:href="@{/projects?page={previousPage}&size=20(previousPage=${currentPage-1})}">
                         <span> &laquo </span>
                     </a>
                 </li>
                 <li class="page-item" th:if="${currentPage - 2 >= 1}">
                     <a class="page-link" th:text="${currentPage - 2}"
-                       th:href="@{/projects?page={previousPage}&size=20(previousPage=${currentPage-2})}" />
+                        th:href="@{/projects?page={previousPage}&size=20(previousPage=${currentPage-2})}" />
                 </li>
                 <li class="page-item" th:if="${currentPage - 1 >= 1}">
                     <a class="page-link" th:text="${currentPage - 1}"
-                       th:href="@{/projects?page={previousPage}&size=20(previousPage=${currentPage-1})}" />
+                        th:href="@{/projects?page={previousPage}&size=20(previousPage=${currentPage-1})}" />
                 </li>
                 <li class="page-item">
                     <a class="page-link active" th:text="${currentPage}"
-                       th:href="@{/projects?page={currentPage}&size=20(currentPage=${currentPage})}" />
+                        th:href="@{/projects?page={currentPage}&size=20(currentPage=${currentPage})}" />
                 </li>
                 <li class="page-item" th:if="${currentPage + 1 <= totalPages}">
                     <a class="page-link" th:text="${currentPage + 1}"
-                       th:href="@{/projects?page={nextPage}&size=20(nextPage=${currentPage+1})}" />
+                        th:href="@{/projects?page={nextPage}&size=20(nextPage=${currentPage+1})}" />
                 </li>
                 <li class="page-item" th:if="${currentPage + 2 <= totalPages}">
                     <a class="page-link" th:text="${currentPage + 2}"
-                       th:href="@{/projects?page={nextPage}&size=20(nextPage=${currentPage+2})}" />
+                        th:href="@{/projects?page={nextPage}&size=20(nextPage=${currentPage+2})}" />
                 </li>
                 <li class="page-item">
                     <a class="page-link" aria-label="Next" th:classappend="${currentPage == totalPages} ? disabled"
-                       th:href="@{/projects?page={nextPage}&size=20(nextPage=${currentPage+1})}">
+                        th:href="@{/projects?page={nextPage}&size=20(nextPage=${currentPage+1})}">
                         <span> &raquo </span>
                     </a>
                 </li>

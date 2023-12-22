@@ -1,5 +1,7 @@
 package id.ac.pnj.kanban.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -14,30 +16,64 @@ public class Member {
 
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
             fetch = FetchType.LAZY,
-            mappedBy = "member"
+            mappedBy = "createdBy"
     )
-    private List<Announcement> announcements;
+    @JsonIgnore
+    private List<Announcement> createdAnnouncements;
 
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
             fetch = FetchType.LAZY,
-            mappedBy = "member"
+            mappedBy = "createdBy"
     )
-    private List<Task> tasks;
+    @JsonIgnore
+    private List<Announcement> updatedAnnouncements;
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+            fetch = FetchType.LAZY,
+            mappedBy = "createdBy"
+    )
+    @JsonIgnore
+    private List<Task> createdTasks;
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+            fetch = FetchType.LAZY,
+            mappedBy = "createdBy"
+    )
+    @JsonIgnore
+    private List<Task> updatedTasks;
 
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+            fetch = FetchType.LAZY,
+            mappedBy = "createdBy"
+    )
+    @JsonIgnore
+    private List<Event> createdEvents;
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+            fetch = FetchType.LAZY,
+            mappedBy = "updatedBy"
+    )
+    @JsonIgnore
+    private List<Event> updatedEvents;
     @OneToMany(
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
             fetch = FetchType.LAZY,
             mappedBy = "member"
     )
-
+    @JsonIgnore
     private List<File> files;
     @OneToMany(
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
             fetch = FetchType.LAZY,
-            mappedBy = "member"
+            mappedBy = "createdBy"
     )
+    @JsonIgnore
+    private List<Note> createdNotes;
 
-    private List<Note> notes;
+    @OneToMany(
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+            fetch = FetchType.LAZY,
+            mappedBy = "createdBy"
+    )
+    @JsonIgnore
+    private List<Note> updatedNotes;
     @ManyToMany(
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
             fetch = FetchType.LAZY
@@ -47,6 +83,7 @@ public class Member {
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "member_id")
     )
+    @JsonIgnore
     private List<Project> projects;
 
     // If I have time, I might change this fetch and optimize it
@@ -59,6 +96,7 @@ public class Member {
             joinColumns = @JoinColumn(name = "member_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @JsonIgnore
     private List<Role> roles;
     private String name;
 
@@ -88,20 +126,52 @@ public class Member {
         this.id = id;
     }
 
-    public List<Announcement> getAnnouncements() {
-        return announcements;
+    public List<Announcement> getCreatedAnnouncements() {
+        return createdAnnouncements;
     }
 
-    public void setAnnouncements(List<Announcement> announcements) {
-        this.announcements = announcements;
+    public void setCreatedAnnouncements(List<Announcement> createdAnnouncements) {
+        this.createdAnnouncements = createdAnnouncements;
     }
 
-    public List<Task> getTasks() {
-        return tasks;
+    public List<Announcement> getUpdatedAnnouncements() {
+        return updatedAnnouncements;
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+    public void setUpdatedAnnouncements(List<Announcement> updatedAnnouncements) {
+        this.updatedAnnouncements = updatedAnnouncements;
+    }
+
+    public List<Task> getCreatedTasks() {
+        return createdTasks;
+    }
+
+    public void setCreatedTasks(List<Task> createdTasks) {
+        this.createdTasks = createdTasks;
+    }
+
+    public List<Task> getUpdatedTasks() {
+        return updatedTasks;
+    }
+
+    public void setUpdatedTasks(List<Task> updatedTasks) {
+        this.updatedTasks = updatedTasks;
+    }
+
+    public List<Event> getCreatedEvents() {
+        return createdEvents;
+    }
+
+    public void setCreatedEvents(List<Event> createdEvents) {
+        this.createdEvents = createdEvents;
+    }
+
+    public List<Event> getUpdatedEvents() {
+        return updatedEvents;
+    }
+
+    public void setUpdatedEvents(List<Event> updatedEvents) {
+        this.updatedEvents = updatedEvents;
     }
 
     public List<File> getFiles() {
@@ -112,12 +182,20 @@ public class Member {
         this.files = files;
     }
 
-    public List<Note> getNotes() {
-        return notes;
+    public List<Note> getCreatedNotes() {
+        return createdNotes;
     }
 
-    public void setNotes(List<Note> notes) {
-        this.notes = notes;
+    public void setCreatedNotes(List<Note> createdNotes) {
+        this.createdNotes = createdNotes;
+    }
+
+    public List<Note> getUpdatedNotes() {
+        return updatedNotes;
+    }
+
+    public void setUpdatedNotes(List<Note> updatedNotes) {
+        this.updatedNotes = updatedNotes;
     }
 
     public List<Project> getProjects() {
@@ -168,24 +246,18 @@ public class Member {
         this.phone = phone;
     }
 
-    /*
-    public int getEnabled() {
-        return enabled;
-    }
-
-
-
-    public void setEnabled(int enabled) {
-        this.enabled = enabled;
-    }
-
-     */
-
     public void addAnnouncement(Announcement announcement) {
-        if (announcements == null) {
-            announcements = new ArrayList<>();
+        if (createdAnnouncements == null) {
+            createdAnnouncements = new ArrayList<>();
         }
-        announcements.add(announcement);
+        createdAnnouncements.add(announcement);
+    }
+
+    public void addEvent(Event event) {
+        if (createdEvents == null) {
+            createdEvents = new ArrayList<>();
+        }
+        createdEvents.add(event);
     }
     public void addFile(File file) {
         if (files == null) {
@@ -195,10 +267,10 @@ public class Member {
     }
 
     public void addNote(Note note) {
-        if (notes == null) {
-            notes = new ArrayList<>();
+        if (createdNotes == null) {
+            createdNotes = new ArrayList<>();
         }
-        notes.add(note);
+        createdNotes.add(note);
     }
 
     public void addProject(Project project) {
@@ -216,9 +288,9 @@ public class Member {
     }
 
     public void addTask(Task task) {
-        if (tasks == null) {
-            tasks = new ArrayList<>();
+        if (createdTasks == null) {
+            createdTasks = new ArrayList<>();
         }
-        tasks.add(task);
+        createdTasks.add(task);
     }
 }

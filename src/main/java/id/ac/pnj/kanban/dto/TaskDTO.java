@@ -21,10 +21,9 @@ import java.time.LocalDateTime;
 public class TaskDTO {
     private int id;
 
-    @NotNull
+    @NotNull(message = "is required")
     private String title;
 
-    @NotNull
     private String member;
 
     private LocalDateTime startDatetime;

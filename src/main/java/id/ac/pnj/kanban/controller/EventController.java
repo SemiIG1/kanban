@@ -2,114 +2,85 @@ package id.ac.pnj.kanban.controller;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import id.ac.pnj.kanban.dao.KanbanDao;
+import id.ac.pnj.kanban.dto.EventDTO;
+import id.ac.pnj.kanban.entity.Event;
+import id.ac.pnj.kanban.entity.Member;
+import id.ac.pnj.kanban.service.KanbanService;
+import id.ac.pnj.kanban.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 public class EventController {
+    public KanbanService kanbanService;
+    public UserService userService;
+
+    public EventController(KanbanService kanbanService, UserService userService) {
+        this.kanbanService = kanbanService;
+        this.userService = userService;
+    }
+
+    @InitBinder
+    public void initBinder(WebDataBinder dataBinder) {
+
+        StringTrimmerEditor stringTrimmerEditor = new StringTrimmerEditor(true);
+
+        dataBinder.registerCustomEditor(String.class, stringTrimmerEditor);
+    }
+
+    @PostMapping("/events/delete")
+    public String deleteEvent(@RequestParam("eventId") int eventId) {
+        kanbanService.deleteEventById(eventId);
+        return "redirect:/events";
+    }
+
+    @PostMapping("/events/save")
+    public String saveEvent(
+            @Valid @ModelAttribute("event") EventDTO eventDTO, BindingResult bindingResult, Principal principal) {
+        if (bindingResult.hasErrors()) {
+            return "event-form";
+        } else {
+            Event event = new Event(
+                    eventDTO.getTitle(), eventDTO.getDescription(), eventDTO.getStart(), eventDTO.getEnd());
+            Member currentLoggedInMember = userService.findUserByEmail(principal.getName());
+            event.setCreatedBy(currentLoggedInMember);
+            kanbanService.save(event);
+            return "redirect:/events";
+        }
+    }
     @GetMapping("/events")
-    public String showEventCalendar() {
+    public String showEventCalendar(Model model) {
+        List<Event> events = kanbanService.findAllEvents();
+        model.addAttribute("events", events);
         return "event-calendar";
     }
 
-    /*
-    @Autowired
-    EventRepository er;
-
-    @RequestMapping("/api")
-    @ResponseBody
-    String home() {
-        return "Welcome!";
+    @GetMapping("/events/show-add-event-form")
+    public String showAddEventForm(Model model) {
+        EventDTO event = new EventDTO();
+        model.addAttribute("event", event);
+        return "event-form";
     }
 
-    @GetMapping("/api/events")
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    Iterable<Event> events(@RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start, @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
-        return er.findBetween(start, end);
+    @PostMapping("/events/show-update-event-form")
+    public String showUpdateEventForm(@RequestParam("eventId") int eventId, Model model) {
+        Event event = kanbanService.findEventById(eventId);
+        EventDTO eventDTO = new EventDTO(event.getTitle(), event.getDescription(), event.getStart(), event.getEnd());
+        model.addAttribute("event", eventDTO);
+        return "event-form";
     }
-
-    @PostMapping("/api/events/create")
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @Transactional
-    Event createEvent(@RequestBody EventCreateParams params) {
-
-        Event e = new Event();
-        e.setStart(params.start);
-        e.setEnd(params.end);
-        e.setText(params.text);
-        er.save(e);
-
-        return e;
-    }
-
-    @PostMapping("/api/events/move")
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @Transactional
-    Event moveEvent(@RequestBody EventMoveParams params) {
-
-        Event e = er.findById(params.id).get();
-        e.setStart(params.start);
-        e.setEnd(params.end);
-        er.save(e);
-
-        return e;
-    }
-
-    @PostMapping("/api/events/setColor")
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @Transactional
-    Event setColor(@RequestBody SetColorParams params) {
-
-        Event e = er.findById(params.id).get();
-        e.setColor(params.color);
-        er.save(e);
-
-        return e;
-    }
-
-    @PostMapping("/api/events/delete")
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @Transactional
-    EventDeleteResponse deleteEvent(@RequestBody EventDeleteParams params) {
-
-        er.deleteById(params.id);
-
-        return new EventDeleteResponse() {{
-            message = "Deleted";
-        }};
-    }
-
-    public static class EventDeleteParams {
-        public Long id;
-    }
-
-    public static class EventDeleteResponse {
-        public String message;
-    }
-
-    public static class EventCreateParams {
-        public LocalDateTime start;
-        public LocalDateTime end;
-        public String text;
-    }
-
-    public static class EventMoveParams {
-        public Long id;
-        public LocalDateTime start;
-        public LocalDateTime end;
-    }
-
-    public static class SetColorParams {
-        public Long id;
-        public String color;
-    }
-
-
-
-     */
 }

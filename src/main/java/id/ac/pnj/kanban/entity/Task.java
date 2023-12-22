@@ -1,6 +1,8 @@
 package id.ac.pnj.kanban.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -11,9 +13,6 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "member_id")
-    private Member member;
 
     @ManyToOne
     @JoinColumn(name = "project_id")
@@ -22,12 +21,27 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "status_id")
     private Status status;
+
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "created_by")
+    private Member createdBy;
+
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "updated_by")
+    private Member updatedBy;
     private String title;
     @Column(name = "start_datetime")
     private LocalDateTime startDatetime;
 
     @Column(name = "deadline")
     private LocalDateTime deadline;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
 
     public Task() {
@@ -49,13 +63,6 @@ public class Task {
         this.id = id;
     }
 
-    public Member getMember() {
-        return member;
-    }
-
-    public void setMember(Member member) {
-        this.member = member;
-    }
 
     public Project getProject() {
         return project;
@@ -63,6 +70,22 @@ public class Task {
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public Member getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Member createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Member getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(Member updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
     public String getTitle() {
@@ -95,5 +118,21 @@ public class Task {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

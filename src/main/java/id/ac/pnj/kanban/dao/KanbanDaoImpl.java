@@ -28,10 +28,52 @@ public class KanbanDaoImpl implements KanbanDao {
     }
 
     @Override
+    @Transactional
+    public void deleteAnnouncementById(int id) {
+        Announcement announcement = entityManager.find(Announcement.class, id);
+        entityManager.remove(announcement);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEventById(int id) {
+        Event event = entityManager.find(Event.class, id);
+        entityManager.remove(event);
+    }
+
+    @Override
+    @Transactional
+    public void deleteFileById(int id) {
+        File file = entityManager.find(File.class, id);
+        entityManager.remove(file);
+    }
+
+    @Override
+    @Transactional
+    public void deleteProjectById(int id) {
+        Project project = entityManager.find(Project.class, id);
+        entityManager.remove(project);
+    }
+
+    @Override
+    @Transactional
+    public void deleteNoteById(int id) {
+        Note note = entityManager.find(Note.class, id);
+        entityManager.remove(note);
+    }
+
+    @Override
+    @Transactional
+    public void deleteTaskById(int id) {
+        Task task = entityManager.find(Task.class, id);
+        entityManager.remove(task);
+    }
+
+    @Override
     public PagedList<Announcement> findAllAnnouncements(Pageable pageable) {
         return criteriaBuilderFactory
                 .create(entityManager, Announcement.class)
-                .fetch("member")
+                .fetch("createdBy")
                 .orderByAsc("id")
                 .page((int) pageable.getOffset(), pageable.getPageSize())
                 .getResultList();
@@ -50,7 +92,7 @@ public class KanbanDaoImpl implements KanbanDao {
     @Override
     public List<Task> findAllDoneTasksByProjectId(int id) {
         return criteriaBuilderFactory.create(entityManager, Task.class)
-                .fetch("member")
+                .fetch("createdBy")
                 .fetch("project")
                 .fetch("status")
                 .whereOr().whereAnd()
@@ -63,13 +105,23 @@ public class KanbanDaoImpl implements KanbanDao {
     }
 
     @Override
+    public List<Event> findAllEvents() {
+        TypedQuery<Event> query = entityManager.createQuery("from Event", Event.class);
+        return query.getResultList();
+    }
+
+    @Override
     public List<File> findAllFilesByProjectId(int id) {
+        /*
         TypedQuery<File> query = entityManager.createQuery("select f from File f " +
                 "join fetch f.project p " +
                 "join fetch f.member m " +
                 "where p.id = :projectId", File.class);
         query.setParameter("projectId", id);
-        criteriaBuilderFactory.create(entityManager, File.class)
+
+         */
+
+        return criteriaBuilderFactory.create(entityManager, File.class)
                 .fetch("project")
                 .fetch("member")
                 .whereOr()
@@ -78,13 +130,12 @@ public class KanbanDaoImpl implements KanbanDao {
                 .orderByAsc("id")
                 .page( 0, 20)
                 .getResultList();
-        return query.getResultList();
     }
 
     @Override
     public List<Task> findAllInProgressTasksByProjectId(int id) {
         return criteriaBuilderFactory.create(entityManager, Task.class)
-                .fetch("member")
+                .fetch("createdBy")
                 .fetch("project")
                 .fetch("status")
                 .whereOr()
@@ -98,27 +149,43 @@ public class KanbanDaoImpl implements KanbanDao {
     }
 
     @Override
-    public List<Member> findAllMembersByProjectId(int id) {
+    public List<Object[]> findAllMembersByProjectId(int id) {
+        /*
         TypedQuery<Member> query = entityManager.createQuery("select m from Member m " +
                 "join fetch m.projects p " +
                 "where p.id = :projectId", Member.class);
 
-        query.setParameter("projectId", id);
-        return query.getResultList();
+
+         */
+        List<Object[]> membersInProject = entityManager
+                .createNativeQuery("SELECT * FROM member WHERE member.id IN " +
+                        "(SELECT member_id FROM project_member WHERE project_id = :id)")
+                .setParameter("id", id)
+                .getResultList();
+
+        return membersInProject;
     }
 
     @Override
-    public List<Member> findAllMembersNotInProjectWithProjectId(int id) {
+    public List<Object[]> findAllMembersNotInProjectWithProjectId(int id) {
+        /*
         TypedQuery<Member> query = entityManager.createQuery("select member from Member member " +
                 "where member not in (select m from Member m join m.projects p where p.id = :projectId)", Member.class);
+
+         */
+        List<Object[]> membersNotInProject = entityManager
+                .createNativeQuery("SELECT * FROM member WHERE member.id NOT IN " +
+                "(SELECT member_id FROM project_member WHERE project_id = :id)")
+                .setParameter("id", id)
+                .getResultList();
         /*
         entityManager.createQuery("select m from Member m " +
                 "join m.projects p where p.id = :id", Member.class);
 
          */
-        query.setParameter("projectId", id);
 
-        return query.getResultList();
+
+        return membersNotInProject;
     }
 
     @Override
@@ -129,11 +196,25 @@ public class KanbanDaoImpl implements KanbanDao {
     }
 
     @Override
+    public Event findEventById(int id) {
+        Event event = entityManager.find(Event.class, id);
+        return event;
+    }
+
+    @Override
     public File findFileById(int id) {
         TypedQuery<File> query =
                 entityManager.createQuery("from File f where f.id = :id", File.class);
         query.setParameter("id", id);
         return query.getSingleResult();
+    }
+
+    @Override
+    public List<Task> findFirst3TasksOrderedByUpdatedAtDesc() {
+        return entityManager.createQuery("select t from Task t " +
+                "join t.project p " +
+                "join t.status s " +
+                "order by t.updatedAt desc").setMaxResults(3).getResultList();
     }
 
 
@@ -176,7 +257,7 @@ public class KanbanDaoImpl implements KanbanDao {
 
         return criteriaBuilderFactory.create(entityManager, Note.class)
                 .fetch("project")
-                .fetch("member")
+                .fetch("createdBy")
                 .whereOr()
                 .where("project.id").eq(id)
                 .endOr()
@@ -209,7 +290,7 @@ public class KanbanDaoImpl implements KanbanDao {
     @Override
     public List<Task> findAllTasksByProjectId(int id) {
         return criteriaBuilderFactory.create(entityManager, Task.class)
-                .fetch("member")
+                .fetch("createdBy")
                 .fetch("project")
                 .fetch("status")
                 .whereOr()
@@ -222,7 +303,7 @@ public class KanbanDaoImpl implements KanbanDao {
     @Override
     public PagedList<Task> findAllTasksByProjectId(int id, Pageable pageable) {
         return criteriaBuilderFactory.create(entityManager, Task.class)
-                .fetch("member")
+                .fetch("createdBy")
                 .fetch("project")
                 .fetch("status")
                 .whereOr()
@@ -236,7 +317,7 @@ public class KanbanDaoImpl implements KanbanDao {
     @Override
     public List<Task> findAllToDoTasksByProjectId(int id) {
         return criteriaBuilderFactory.create(entityManager, Task.class)
-                .fetch("member")
+                .fetch("createdBy")
                 .fetch("project")
                 .fetch("status")
                 .whereOr().whereAnd()
@@ -256,24 +337,25 @@ public class KanbanDaoImpl implements KanbanDao {
     }
 
     @Override
-    public Double findProjectProgressById(int id) {
+    public int findProjectProgressById(int id) {
         List<Object[]> results = entityManager
-                .createQuery("select count(*), t.status from Task t " +
-                        "join fetch Project p where p.id = :id group by t.status", Object[].class)
+                .createNativeQuery("SELECT status_id, COUNT(*) FROM task " +
+                        "WHERE project_id = :id GROUP BY status_id", Object[].class)
                 .setParameter("id", id).getResultList();
         int doneTasks = 0;
         int totalTasks = 0;
 
         for (var result: results) {
-            int count = (int) result[0];
+            int statusId = (int) result[0];
+            long count = (long) result[1];
             totalTasks += count;
-            Status status = (Status) result[1];
-            if (Objects.equals(status.getName(), "Done")) {
+
+            if (statusId == 3) {
                 doneTasks += count;
             }
         }
-        Double percentage = (double) doneTasks / totalTasks;
-        return percentage;
+        Double doublePercentage = ((double) doneTasks / totalTasks) * 100;
+        return doublePercentage.intValue();
     }
 
     @Override
@@ -324,7 +406,19 @@ public class KanbanDaoImpl implements KanbanDao {
     @Override
     @Transactional
     public void save(Announcement announcement) {
-        entityManager.persist(announcement);
+        Announcement databaseAnnouncement = entityManager.find(Announcement.class, announcement.getId());
+        if (databaseAnnouncement == null) {
+            entityManager.persist(announcement);
+        } else {
+            entityManager.merge(announcement);
+        }
+
+    }
+
+    @Override
+    @Transactional
+    public void save(Event event) {
+        entityManager.persist(event);
     }
 
     @Override
@@ -342,19 +436,35 @@ public class KanbanDaoImpl implements KanbanDao {
     @Override
     @Transactional
     public void save(Note note) {
-        entityManager.persist(note);
+        Note databaseNote = entityManager.find(Note.class, note.getId());
+        if (databaseNote == null) {
+            entityManager.persist(note);
+        } else {
+            entityManager.merge(note);
+        }
     }
 
     @Override
     @Transactional
     public void save(Project project) {
-        entityManager.persist(project);
+
+        Project databaseProject = entityManager.find(Project.class, project.getId());
+        if (databaseProject == null) {
+            entityManager.persist(project);
+        } else {
+            entityManager.merge(project);
+        }
     }
 
     @Override
     @Transactional
     public void save(Task task) {
-        entityManager.persist(task);
+        Task databaseTask = entityManager.find(Task.class, task.getId());
+        if (databaseTask == null) {
+            entityManager.persist(task);
+        } else {
+            entityManager.merge(task);
+        }
     }
 
     @Override

@@ -7,14 +7,21 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface KanbanDao {
+    void deleteAnnouncementById(int id);
+    void deleteEventById(int id);
+    void deleteFileById(int id);
+    void deleteProjectById(int id);
+    void deleteNoteById(int id);
+    void deleteTaskById(int id);
     PagedList<Announcement> findAllAnnouncements(Pageable pageable);
     Announcement findAnnouncementById(int id);
     List<Task> findAllDoneTasksByProjectId(int id);
+    List<Event> findAllEvents();
     List<File> findAllFilesByProjectId(int id);
     List<Task> findAllInProgressTasksByProjectId(int id);
 
-    List<Member> findAllMembersByProjectId(int id);
-    List<Member> findAllMembersNotInProjectWithProjectId(int id);
+    List<Object[]> findAllMembersByProjectId(int id);
+    List<Object[]> findAllMembersNotInProjectWithProjectId(int id);
 
     PagedList<Note> findAllNotesByProjectId(int id, Pageable pageable);
     PagedList<Project> findAllProjects(Pageable pageable);
@@ -26,7 +33,9 @@ public interface KanbanDao {
 
     List<Task> findAllToDoTasksByProjectId(int id);
     List<Member> findAllMembers();
+    Event findEventById(int id);
     File findFileById(int id);
+    List<Task> findFirst3TasksOrderedByUpdatedAtDesc();
 
     Member findMemberByEmail(String email);
 
@@ -34,7 +43,7 @@ public interface KanbanDao {
 
     Note findNoteById(int id);
     Project findProjectById(int id);
-    Double findProjectProgressById(int id);
+    int findProjectProgressById(int id);
 
     Role findRoleByName(String name);
 
@@ -42,6 +51,7 @@ public interface KanbanDao {
 
     Task findTaskById(int id);
     void save(Announcement announcement);
+    void save(Event event);
     void save(File file);
 
     void save(Member member);

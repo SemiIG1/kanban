@@ -1,6 +1,7 @@
 package id.ac.pnj.kanban.controller;
 
 import com.blazebit.persistence.PagedList;
+import id.ac.pnj.kanban.dto.FileDTO;
 import id.ac.pnj.kanban.dto.NoteDTO;
 import id.ac.pnj.kanban.dto.ProjectDTO;
 import id.ac.pnj.kanban.dto.TaskDTO;
@@ -24,6 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,6 +53,26 @@ public class ProjectController {
     public void initBinder(WebDataBinder webDataBinder) {
         StringTrimmerEditor stringTrimmerEditor = new StringTrimmerEditor(true);
         webDataBinder.registerCustomEditor(String.class, stringTrimmerEditor);
+    }
+    @PostMapping("/projects/{projectId}/files/delete")
+    public String deleteFile(@PathVariable int projectId, @RequestParam("fileId") int fileId) {
+        storageService.deleteFileById(fileId);
+        return "redirect:/projects/" + projectId + "/files";
+    }
+    @PostMapping("/projects/{projectId}/notes/delete")
+    public String deleteNote(@PathVariable int projectId, @RequestParam("noteId") int noteId) {
+        kanbanService.deleteNoteById(noteId);
+        return "redirect:/projects/" + projectId + "/notes";
+    }
+    @PostMapping("/projects/delete")
+    public String deleteProject(@RequestParam("projectId") int projectId) {
+        kanbanService.deleteProjectById(projectId);
+        return "redirect:/projects";
+    }
+    @PostMapping("/projects/{projectId}/tasks/delete")
+    public String deleteTask(@PathVariable int projectId, @RequestParam("taskId") int taskId) {
+        kanbanService.deleteTaskById(taskId);
+        return "redirect:/projects/" + taskId + "/tasks";
     }
     @PostMapping("/projects/{projectId}/files/show-add-file-form/upload-file")
     public String handleFileUpload(
@@ -79,8 +103,22 @@ public class ProjectController {
         }
         else {
             Member currentLoggedInMember = userService.findUserByEmail(principal.getName());
+            Note note;
+            if (noteDTO.getId() == 0) {
+                note = new Note(noteDTO.getMessage(), LocalDateTime.now());
+                note.setId(noteDTO.getId());
+                note.setCreatedBy(currentLoggedInMember);
+            } else {
+                note = kanbanService.findNoteById(noteDTO.getId());
+                note.setMessage(noteDTO.getMessage());
+                note.setUpdatedBy(currentLoggedInMember);
+            }
+            kanbanService.save(note);
+            /*
             Note note = new Note(noteDTO.getMessage(), LocalDateTime.now());
-            note.setMember(currentLoggedInMember);
+            note.setCreatedBy(currentLoggedInMember);
+
+             */
             Project project = kanbanService.findProjectById(projectId);
             note.setProject(project);
             kanbanService.save(note);
@@ -110,23 +148,30 @@ public class ProjectController {
         }
     }
 
-    @PostMapping("/projects/{projectId}/tasks/show-add-task-form/save")
+    @PostMapping("/projects/{projectId}/tasks/save")
     public String saveTask(
             @Valid @ModelAttribute("task") TaskDTO taskDTO,
             @PathVariable int projectId,
             BindingResult bindingResult){
+        System.out.println(taskDTO.getMember());
         if (bindingResult.hasErrors()) {
             return "task-form";
         }
         else {
             Task task = new Task(taskDTO.getTitle(), taskDTO.getStartDatetime(), taskDTO.getDeadline());
             Member selectedMember = kanbanService.findMemberByName(taskDTO.getMember());
-            task.setMember(selectedMember);
+            task.setCreatedBy(selectedMember);
             Status initialStatus = kanbanService.findStatusByName(taskDTO.getStatus());
             task.setStatus(initialStatus);
             Project project = kanbanService.findProjectById(projectId);
+
             task.setProject(project);
             kanbanService.save(task);
+            int projectProgress = kanbanService.findProjectProgressById(projectId);
+            project.setProgress(projectProgress);
+            kanbanService.save(project);
+            System.out.println("Project progress: " + projectProgress);
+
             return "redirect:/projects/" + projectId + "/tasks";
         }
     }
@@ -152,7 +197,7 @@ public class ProjectController {
 
     @GetMapping("/projects/{projectId}/notes/show-add-note-form")
     public String showAddNoteForm(@PathVariable int projectId, Model model) {
-        Note note = new Note();
+        NoteDTO note = new NoteDTO();
         model.addAttribute("note", note);
         model.addAttribute("projectId", projectId);
         return "note-form";
@@ -167,25 +212,25 @@ public class ProjectController {
     }
     @GetMapping("/projects/{projectId}/tasks/show-add-task-form")
     public String showAddTaskForm(@PathVariable int projectId, Model model) {
-        Task task = new Task();
-        List<Member> members = kanbanService.findAllMembersByProjectId(projectId);
+
+        List<Object[]> members = kanbanService.findAllMembersByProjectId(projectId);
         List<Status> statuses = kanbanService.findAllStatuses();
+
         model.addAttribute("members", members);
         model.addAttribute("statuses", statuses);
-        model.addAttribute("task", task);
+        model.addAttribute("task", new TaskDTO());
 
         return "task-form";
     }
     @GetMapping("/projects/{projectId}/files")
     public String showFileList(@PathVariable int projectId, Model model) {
-        List<File> files = kanbanService.findAllFilesByProjectId(projectId);
-        Project project = kanbanService.findProjectById(projectId);
-        // model.addAttribute("files", files);
-        model.addAttribute("files", storageService.loadAll().map(
-                        path -> MvcUriComponentsBuilder.fromMethodName(ProjectController.class,
-                                "serveFile", path.getFileName().toString()).build().toUri().toString())
-                .collect(Collectors.toList()));
-        model.addAttribute("projectId", projectId);
+        List<FileDTO> fileDTOList = storageService.loadAllFilesFromDatabaseByProjectId(projectId).map(
+                file -> {file.setPath(MvcUriComponentsBuilder.fromMethodName(
+                    ProjectController.class, "serveFile",
+                    Paths.get(file.getPath()).getFileName().toString()).build().toUri().toString());
+                return file;
+        }).collect(Collectors.toList());
+        model.addAttribute("files", fileDTOList);
         return "file-list";
     }
     @GetMapping("/projects/{projectId}/notes")
@@ -219,7 +264,8 @@ public class ProjectController {
 
     @GetMapping("/projects/{projectId}/show-add-member-form")
     public String showProjectMemberForm(@PathVariable int projectId, Model model) {
-        List<Member> membersNotInProject = kanbanService.findAllMembersNotInProjectWithProjectId(projectId);
+        List<Object[]> membersNotInProject = kanbanService.findAllMembersNotInProjectWithProjectId(projectId);
+
         model.addAttribute("member", new Member());
         model.addAttribute("membersNotInProject", membersNotInProject);
         return "project-member-form";
@@ -227,15 +273,17 @@ public class ProjectController {
 
     @GetMapping("/projects/{projectId}")
     public String showProjectOverview(@PathVariable int projectId, Model model) {
-        List<Member> members = kanbanService.findAllMembersByProjectId(projectId);
+        List<Object[]> members = kanbanService.findAllMembersByProjectId(projectId);
         List<Task> doneTasks = kanbanService.findAllDoneTasksByProjectId(projectId);
         List<Task> inProgressTasks = kanbanService.findAllInProgressTasksByProjectId(projectId);
+        int projectProgress = kanbanService.findProjectProgressById(projectId);
         List<Task> toDoTasks = kanbanService.findAllToDoTasksByProjectId(projectId);
 
         model.addAttribute("doneTasks", doneTasks);
         model.addAttribute("inProgressTasks", inProgressTasks);
         model.addAttribute("members", members);
         model.addAttribute("projectId", projectId);
+        model.addAttribute("projectProgress", projectProgress);
         model.addAttribute("toDoTasks", toDoTasks);
 
         return "project-overview";
@@ -253,5 +301,34 @@ public class ProjectController {
         model.addAttribute("tasks", tasks);
         model.addAttribute("totalPages", tasks.getTotalPages());
         return "task-list";
+    }
+
+    @PostMapping("/projects/{projectId}/notes/show-update-note-form")
+    public String showUpdateNoteForm(@PathVariable("projectId") int projectId, @RequestParam("noteId") int noteId, Model model) {
+        Note note = kanbanService.findNoteById(noteId);
+
+        NoteDTO noteDTO = new NoteDTO(note.getMessage());
+        noteDTO.setId(note.getId());
+
+        model.addAttribute("note", noteDTO);
+        return "note-form";
+    }
+    @PostMapping("/projects/show-update-project-form")
+    public String showUpdateProjectForm(@RequestParam("projectId") int projectId, Model model) {
+        Project project = kanbanService.findProjectById(projectId);
+        List<Status> statuses = kanbanService.findAllStatuses();
+        model.addAttribute("project", project);
+        model.addAttribute("statuses", statuses);
+        return "project-form";
+    }
+    @PostMapping("/projects/{projectId}/tasks/show-update-task-form")
+    public String showUpdateTaskForm(@PathVariable int projectId, @RequestParam("taskId") int taskId, Model model) {
+        Task task = kanbanService.findTaskById(taskId);
+        List<Object[]> members = kanbanService.findAllMembersByProjectId(projectId);
+        List<Status> statuses = kanbanService.findAllStatuses();
+        model.addAttribute("members", members);
+        model.addAttribute("statuses", statuses);
+        model.addAttribute("task", task);
+        return "task-form";
     }
 }

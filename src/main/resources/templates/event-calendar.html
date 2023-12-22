@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
   <meta charset="UTF-8">
@@ -9,40 +7,123 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        customButtons: {
+          addEventButton: {
+            text: "Add event",
+            click: function () {
+              window.location.assign("http://localhost:8080/events/show-add-event-form");
+            }
+          }
+        },
+        eventClick: function (info) {
+
+          const calendarModalEl = document.getElementById("calendar-modal");
+          calendarModalEl.addEventListener("shown.bs.modal", event => {
+            if (document.getElementsByName("eventId").length > 0) {
+              document.getElementsByName("eventId")[0].value = info.event.id;
+              document.getElementsByName("eventId")[1].value = info.event.id;
+            }
+            document.getElementById("calendar-modal-title").innerHTML = info.event.title;
+            document.getElementById("calendar-modal-description").innerHTML = info.event.extendedProps.description;
+            document.getElementById("calendar-modal-period").innerHTML = "From " +
+              info.event.start + " to " + info.event.end;
+          });
+          const calendarModal = new bootstrap.Modal(document.getElementById("calendar-modal"), {
+            keyboard: false
+          });
+          calendarModal.show();
+        },
+        events: {
+          url: "/api/events"
+        },
+        failure: function (info) {
+
+        },
+        headerToolbar: {
+          left: "prev,next today",
+          center: "title",
+          right: "addEventButton"
+        },
+        themeSystem: "bootstrap5"
+
+      });
+      calendar.render();
+    });
+
+
+
+  </script>
 </head>
 
 <body>
-<!--Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <!-- Navbar content -->
-  <div class="container-fluid">
-    <span class="navbar-brand">Project Management</span>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-link" aria-current="page" th:href="@{/index}">Dashboard</a>
-        <a class="nav-link" th:href="@{/announcements}">Announcements</a>
-        <a class="nav-link active" th:href="@{/events}">Events</a>
-        <a class="nav-link" th:href="@{/projects}">Projects</a>
-        <a class="nav-link" th:href="@{/members}">Team</a>
+  <!--Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!-- Navbar content -->
+    <div class="container-fluid">
+      <span class="navbar-brand">Project Management</span>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-link" aria-current="page" th:href="@{/index}">Dashboard</a>
+          <a class="nav-link" th:href="@{/announcements}">Announcements</a>
+          <a class="nav-link active" th:href="@{/events}">Events</a>
+          <a class="nav-link" th:href="@{/projects}">Projects</a>
+          <a class="nav-link" th:href="@{/members}">Team</a>
+        </div>
+      </div>
+      <div class="d-flex">
+        <i class="bi bi-person-circle"></i>
+        <p class="text-light"><span sec:authentication="name"></span></p>
+        <form action="#" th:action="@{/logout}" method="POST">
+          <button type="submit" class="btn btn-danger">Logout</button>
+        </form>
+      </div>
+
+
+    </div>
+  </nav>
+  <div id="calendar"></div>
+  <div id="calendar-modal" class="modal">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 id="calendar-modal-title" class="modal-title fs-5">
+          </h1>
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid">
+            <div class="row">
+              <p id="calendar-modal-description"></p>
+            </div>
+            <div class="row">
+              <p id="calendar-modal-period"></p>
+            </div>
+
+          </div>
+        </div>
+        <div sec:authorize="hasRole('PROJECT_MANAGER')" class="modal-footer">
+          <form th:action="@{/events/show-update-event-form}" id="updateEventForm" method="POST">
+            <input type="hidden" name="eventId" value="0" />
+            <button type="submit" class="btn btn-primary">Edit</button>
+          </form>
+          <form th:action="@{/events/delete}" method="POST">
+            <input type="hidden" name="eventId" value="0" />
+            <button type="submit" class="btn btn-danger"
+              onclick="return confirm('Are you sure you want to delete this event?')">Delete</button>
+          </form>
+        </div>
       </div>
     </div>
-    <div class="d-flex">
-      <i class="bi bi-person-circle"></i>
-      <p class="text-light">Patar Marpaung</p>
-      <form action="#" th:action="@{/logout}" method="POST">
-        <button type="submit" class="btn btn-danger">Logout</button>
-      </form>
-
-    </div>
-
-
   </div>
-</nav>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
 
