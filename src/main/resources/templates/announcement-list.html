@@ -50,9 +50,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th scope="col">
-                        No
-                    </th>
+
                     <th scope="col">
                         Message
                     </th>
@@ -75,7 +73,7 @@
             </thead>
             <tbody>
                 <tr th:each="announcement : ${announcements}">
-                    <td th:text="${announcement.id}" />
+
                     <td th:text="${announcement.message}" />
                     <td th:text="${announcement.createdBy.name}" />
                     <td th:text="${announcement.createdAt}" />

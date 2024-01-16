@@ -62,9 +62,7 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th scope="col">
-                                Id
-                            </th>
+
                             <th scope="col">
                                 Name
                             </th>
@@ -84,7 +82,7 @@
                     </thead>
                     <tbody>
                         <tr th:each="file : ${files}">
-                            <td th:text="${file.id}" > </td>
+
                             <td> <a th:href="${file.path}"
                                     th:text="${#strings.arraySplit(file.path,'/')[5]}"></a> </td>
                             <td th:text="${file.createdAt}" > </td>

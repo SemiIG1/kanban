@@ -1,10 +1,7 @@
 package id.ac.pnj.kanban.controller;
 
 import com.blazebit.persistence.PagedList;
-import id.ac.pnj.kanban.dto.FileDTO;
-import id.ac.pnj.kanban.dto.NoteDTO;
-import id.ac.pnj.kanban.dto.ProjectDTO;
-import id.ac.pnj.kanban.dto.TaskDTO;
+import id.ac.pnj.kanban.dto.*;
 import id.ac.pnj.kanban.entity.*;
 import id.ac.pnj.kanban.service.KanbanService;
 import id.ac.pnj.kanban.service.UserService;
@@ -83,10 +80,10 @@ public class ProjectController {
         return "redirect:/projects/" + projectId + "/files";
     }
     @PostMapping("/projects/{projectId}/show-add-member-form/save")
-    public String saveMember(@ModelAttribute("member") Member member,
+    public String saveMember(@ModelAttribute("member") ProjectMemberDTO projectMemberDTO,
             @PathVariable int projectId) {
         Project project = kanbanService.findProjectById(projectId);
-        Member foundMember = kanbanService.findMemberByName(member.getName());
+        Member foundMember = kanbanService.findMemberByName(projectMemberDTO.getMember());
         project.addMember(foundMember);
         kanbanService.save(project);
         return "redirect:/projects/" + projectId;
@@ -114,11 +111,7 @@ public class ProjectController {
                 note.setUpdatedBy(currentLoggedInMember);
             }
             kanbanService.save(note);
-            /*
-            Note note = new Note(noteDTO.getMessage(), LocalDateTime.now());
-            note.setCreatedBy(currentLoggedInMember);
 
-             */
             Project project = kanbanService.findProjectById(projectId);
             note.setProject(project);
             kanbanService.save(note);
@@ -152,19 +145,27 @@ public class ProjectController {
     public String saveTask(
             @Valid @ModelAttribute("task") TaskDTO taskDTO,
             @PathVariable int projectId,
-            BindingResult bindingResult){
+            BindingResult bindingResult,
+            Principal principal){
         System.out.println(taskDTO.getMember());
         if (bindingResult.hasErrors()) {
             return "task-form";
         }
         else {
-            Task task = new Task(taskDTO.getTitle(), taskDTO.getStartDatetime(), taskDTO.getDeadline());
-            Member selectedMember = kanbanService.findMemberByName(taskDTO.getMember());
-            task.setCreatedBy(selectedMember);
+            Member currentLoggedInMember = kanbanService.findMemberByName(taskDTO.getMember());
+            Task task;
+            if (taskDTO.getId() == 0) {
+                task = new Task(taskDTO.getTitle(), taskDTO.getStartDatetime(), taskDTO.getDeadline());
+                task.setCreatedBy(currentLoggedInMember);
+            } else {
+                task = kanbanService.findTaskById(taskDTO.getId());
+                task.setUpdatedBy(currentLoggedInMember);
+            }
+
             Status initialStatus = kanbanService.findStatusByName(taskDTO.getStatus());
             task.setStatus(initialStatus);
-            Project project = kanbanService.findProjectById(projectId);
 
+            Project project = kanbanService.findProjectById(projectId);
             task.setProject(project);
             kanbanService.save(task);
             int projectProgress = kanbanService.findProjectProgressById(projectId);
@@ -266,7 +267,7 @@ public class ProjectController {
     public String showProjectMemberForm(@PathVariable int projectId, Model model) {
         List<Object[]> membersNotInProject = kanbanService.findAllMembersNotInProjectWithProjectId(projectId);
 
-        model.addAttribute("member", new Member());
+        model.addAttribute("member", new ProjectMemberDTO());
         model.addAttribute("membersNotInProject", membersNotInProject);
         return "project-member-form";
     }
@@ -324,11 +325,13 @@ public class ProjectController {
     @PostMapping("/projects/{projectId}/tasks/show-update-task-form")
     public String showUpdateTaskForm(@PathVariable int projectId, @RequestParam("taskId") int taskId, Model model) {
         Task task = kanbanService.findTaskById(taskId);
+        TaskDTO taskDTO = new TaskDTO(task.getTitle(), task.getStartDatetime(), task.getDeadline(), task.getStatus().getName());
+        taskDTO.setId(task.getId());
         List<Object[]> members = kanbanService.findAllMembersByProjectId(projectId);
         List<Status> statuses = kanbanService.findAllStatuses();
         model.addAttribute("members", members);
         model.addAttribute("statuses", statuses);
-        model.addAttribute("task", task);
+        model.addAttribute("task", taskDTO);
         return "task-form";
     }
 }

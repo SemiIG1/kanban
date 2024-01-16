@@ -112,14 +112,6 @@ public class KanbanDaoImpl implements KanbanDao {
 
     @Override
     public List<File> findAllFilesByProjectId(int id) {
-        /*
-        TypedQuery<File> query = entityManager.createQuery("select f from File f " +
-                "join fetch f.project p " +
-                "join fetch f.member m " +
-                "where p.id = :projectId", File.class);
-        query.setParameter("projectId", id);
-
-         */
 
         return criteriaBuilderFactory.create(entityManager, File.class)
                 .fetch("project")
@@ -150,13 +142,7 @@ public class KanbanDaoImpl implements KanbanDao {
 
     @Override
     public List<Object[]> findAllMembersByProjectId(int id) {
-        /*
-        TypedQuery<Member> query = entityManager.createQuery("select m from Member m " +
-                "join fetch m.projects p " +
-                "where p.id = :projectId", Member.class);
 
-
-         */
         List<Object[]> membersInProject = entityManager
                 .createNativeQuery("SELECT * FROM member WHERE member.id IN " +
                         "(SELECT member_id FROM project_member WHERE project_id = :id)")
@@ -168,21 +154,13 @@ public class KanbanDaoImpl implements KanbanDao {
 
     @Override
     public List<Object[]> findAllMembersNotInProjectWithProjectId(int id) {
-        /*
-        TypedQuery<Member> query = entityManager.createQuery("select member from Member member " +
-                "where member not in (select m from Member m join m.projects p where p.id = :projectId)", Member.class);
 
-         */
         List<Object[]> membersNotInProject = entityManager
                 .createNativeQuery("SELECT * FROM member WHERE member.id NOT IN " +
                 "(SELECT member_id FROM project_member WHERE project_id = :id)")
                 .setParameter("id", id)
                 .getResultList();
-        /*
-        entityManager.createQuery("select m from Member m " +
-                "join m.projects p where p.id = :id", Member.class);
 
-         */
 
 
         return membersNotInProject;
@@ -343,18 +321,21 @@ public class KanbanDaoImpl implements KanbanDao {
                         "WHERE project_id = :id GROUP BY status_id", Object[].class)
                 .setParameter("id", id).getResultList();
         int doneTasks = 0;
+        int inProgressTasks = 0;
         int totalTasks = 0;
 
         for (var result: results) {
             int statusId = (int) result[0];
             long count = (long) result[1];
             totalTasks += count;
-
+            if (statusId == 2) {
+                inProgressTasks += count;
+            }
             if (statusId == 3) {
                 doneTasks += count;
             }
         }
-        Double doublePercentage = ((double) doneTasks / totalTasks) * 100;
+        Double doublePercentage = (( 0.5 * (double) inProgressTasks + (double) doneTasks) / totalTasks) * 100;
         return doublePercentage.intValue();
     }
 
@@ -454,6 +435,7 @@ public class KanbanDaoImpl implements KanbanDao {
         } else {
             entityManager.merge(project);
         }
+
     }
 
     @Override

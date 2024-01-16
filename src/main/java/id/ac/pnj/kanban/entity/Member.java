@@ -80,8 +80,8 @@ public class Member {
     )
     @JoinTable(
             name = "project_member",
-            joinColumns = @JoinColumn(name = "project_id"),
-            inverseJoinColumns = @JoinColumn(name = "member_id")
+            joinColumns = @JoinColumn(name = "member_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_id")
     )
     @JsonIgnore
     private List<Project> projects;

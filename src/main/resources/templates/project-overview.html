@@ -199,35 +199,36 @@
                         let toDoTasksCount = document.getElementById("to-do-div").children.length - 1;
                         let inProgressTasksCount = document.getElementById("in-progress-div").children.length - 1;
                         let doneTasksCount = document.getElementById("done-div").children.length - 1;
-                        let percentage = (doneTasksCount / (toDoTasksCount + inProgressTasksCount + doneTasksCount)) * 100;
+                        let percentage = ((doneTasksCount + 0.5 * inProgressTasksCount)  / (toDoTasksCount + inProgressTasksCount + doneTasksCount)) * 100;
                         document.getElementById("text-progress").innerHTML = "Project: " + percentage + "%";
                         document.getElementsByClassName("progress-bar")[0].style.width = percentage + "%";
+                        var url = window.location.href;
+                        const splitArray = url.split("/");
+                        $.ajax({
+                            method: "GET",
+                            url: "http://localhost:8080/api/projects/" + splitArray[4],
+                            dataType: "json",
+                            success(data) {
+                                var projectResponse = JSON.parse(data);
+                                document.getElementById("text-progress").innerHTML = "Project: " + projectResponse.percentage + "%";
+                                document.getElementsByClassName("progress-bar").style.width = projectResponse.percentage + "%";
+                            },
+                            error(data) {
+                                console.log(data);
+                            }
+                        });
                     }
                 });
 
 
-                /*
-                var url = window.location.href;
-                const splitArray = url.split("/");
-                $.ajax({
-                    method: "GET",
-                    url: "http://localhost:8080/api/projects/" + splitArray[4],
-                    dataType: "json",
-                    success(data) {
-                        var projectResponse = JSON.parse(data);
-                        document.getElementById("text-progress").innerHTML = "Project: " + projectResponse.percentage + "%";
-                        document.getElementsByClassName("progress-bar").style.width = projectResponse.percentage + "%";
-                    }
-                    error(data) {
-                        console.log(data);
-                    }
-                });
 
-                */
+
+
+
             }
         });
 
-        /* */
+
     </script>
 </body>
 
