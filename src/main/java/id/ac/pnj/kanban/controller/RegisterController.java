@@ -3,8 +3,10 @@ package id.ac.pnj.kanban.controller;
 import id.ac.pnj.kanban.entity.Member;
 import id.ac.pnj.kanban.entity.Role;
 import id.ac.pnj.kanban.service.KanbanService;
+import id.ac.pnj.kanban.service.OTPService;
 import id.ac.pnj.kanban.service.UserService;
 import id.ac.pnj.kanban.user.WebUser;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +25,13 @@ public class RegisterController {
     private KanbanService kanbanService;
     private UserService userService;
 
+    private OTPService otpService;
 
-    public RegisterController(KanbanService kanbanService, UserService userService) {
+
+    public RegisterController(KanbanService kanbanService, UserService userService, OTPService otpService) {
         this.kanbanService = kanbanService;
         this.userService = userService;
+        this.otpService = otpService;
     }
 
     @InitBinder
@@ -49,7 +54,7 @@ public class RegisterController {
     public String processRegisterForm(
             @Valid @ModelAttribute("webUser") WebUser theWebUser,
             BindingResult theBindingResult,
-            HttpSession session, Model theModel) {
+            HttpSession session, Model theModel) throws MessagingException {
 
         String userName = theWebUser.getEmail();
 
@@ -67,15 +72,29 @@ public class RegisterController {
             return "register-form";
         }
 
-        // create user account and store in the database
 
         userService.save(theWebUser);
+        // Generate OTP
+        // otpService.generateOtp(userName);
 
         // place user in the web http session for later use
         session.setAttribute("user", theWebUser);
 
         return "login-form";
+        // return "email-verification";
     }
 
+    @PostMapping("/process-register-form/validate")
+    public String validate(@RequestParam("otp") int otp, Model model) {
+        WebUser theWebUser = (WebUser) model.getAttribute("user");
+        if (otpService.invalidateOtp(theWebUser.getEmail(), otp)) {
+            // create user account and store in the database
+            // userService.save(theWebUser);
+            return "login-form";
+        } else {
+            return "email-verification";
+        }
+
+    }
 
 }

@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Controller
 public class ProjectController {
     private KanbanService kanbanService;
@@ -66,6 +68,12 @@ public class ProjectController {
         kanbanService.deleteProjectById(projectId);
         return "redirect:/projects";
     }
+
+    @PostMapping("/projects/{projectId}/members/delete")
+    public String deleteProjectMember(@PathVariable int projectId, @RequestParam("memberId") int memberId) {
+        kanbanService.deleteProjectMemberById(projectId, memberId);
+        return "redirect:/projects";
+    }
     @PostMapping("/projects/{projectId}/tasks/delete")
     public String deleteTask(@PathVariable int projectId, @RequestParam("taskId") int taskId) {
         kanbanService.deleteTaskById(taskId);
@@ -78,6 +86,21 @@ public class ProjectController {
         Member currentLoggedInMember = userService.findUserByEmail(principal.getName());
         storageService.store(file, projectId, currentLoggedInMember);
         return "redirect:/projects/" + projectId + "/files";
+    }
+    @PostMapping("/projects/{projectId}/members/show-update-member-form/save")
+    public String saveEditedMember(@Valid @ModelAttribute("member") EditProjectMemberDTO editProjectMemberDTO,
+                             @PathVariable int projectId, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "edit-project-member";
+        } else {
+            Member databaseMember = kanbanService.findMemberById(editProjectMemberDTO.getId());
+            databaseMember.setName(editProjectMemberDTO.getName());
+            databaseMember.setEmail(editProjectMemberDTO.getEmail());
+            databaseMember.setPhone(editProjectMemberDTO.getPhone());
+            kanbanService.save(databaseMember);
+            return "redirect:/projects/" + projectId;
+        }
+
     }
     @PostMapping("/projects/{projectId}/show-add-member-form/save")
     public String saveMember(@ModelAttribute("member") ProjectMemberDTO projectMemberDTO,
@@ -230,7 +253,7 @@ public class ProjectController {
                     ProjectController.class, "serveFile",
                     Paths.get(file.getPath()).getFileName().toString()).build().toUri().toString());
                 return file;
-        }).collect(Collectors.toList());
+        }).collect(toList());
         model.addAttribute("files", fileDTOList);
         return "file-list";
     }
@@ -304,6 +327,15 @@ public class ProjectController {
         return "task-list";
     }
 
+    @PostMapping("/projects/{projectId}/members/show-update-member-form")
+    public String showUpdateMemberForm(@PathVariable("projectId") int projectId, @RequestParam("memberId") int memberId, Model model) {
+        Member member = kanbanService.findMemberById(memberId);
+        EditProjectMemberDTO memberDTO = new EditProjectMemberDTO(memberId, member.getName(), member.getEmail(), member.getPhone());
+        model.addAttribute("member", memberDTO);
+        return "edit-project-member-form";
+    }
+
+
     @PostMapping("/projects/{projectId}/notes/show-update-note-form")
     public String showUpdateNoteForm(@PathVariable("projectId") int projectId, @RequestParam("noteId") int noteId, Model model) {
         Note note = kanbanService.findNoteById(noteId);
@@ -314,6 +346,7 @@ public class ProjectController {
         model.addAttribute("note", noteDTO);
         return "note-form";
     }
+
     @PostMapping("/projects/show-update-project-form")
     public String showUpdateProjectForm(@RequestParam("projectId") int projectId, Model model) {
         Project project = kanbanService.findProjectById(projectId);
@@ -322,6 +355,19 @@ public class ProjectController {
         model.addAttribute("statuses", statuses);
         return "project-form";
     }
+
+
+     /*
+    @PostMapping("/projects/{projectId}/show-update-member-form")
+    public String showUpdateProjectMemberForm(@PathVariable("projectId") int projectId, Model model) {
+        Project project = kanbanService.findProjectById(projectId);
+        List<Status> statuses = kanbanService.findAllStatuses();
+        model.addAttribute("project", project);
+        model.addAttribute("statuses", statuses);
+        return "project-form";
+    }
+
+      */
     @PostMapping("/projects/{projectId}/tasks/show-update-task-form")
     public String showUpdateTaskForm(@PathVariable int projectId, @RequestParam("taskId") int taskId, Model model) {
         Task task = kanbanService.findTaskById(taskId);

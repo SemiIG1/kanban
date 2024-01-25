@@ -3,7 +3,6 @@ package id.ac.pnj.kanban.service;
 import com.blazebit.persistence.PagedList;
 import id.ac.pnj.kanban.dao.KanbanDao;
 import id.ac.pnj.kanban.entity.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +29,11 @@ public class KanbanServiceImpl implements KanbanService {
     @Override
     public void deleteProjectById(int id) {
         kanbanDao.deleteProjectById(id);
+    }
+
+    @Override
+    public void deleteProjectMemberById(int projectId, int memberId) {
+        kanbanDao.deleteProjectMemberById(projectId, memberId);
     }
 
     @Override
@@ -132,8 +136,13 @@ public class KanbanServiceImpl implements KanbanService {
     }
 
     @Override
-    public List<Task> findFirst3TasksOrderedByUpdatedAtDesc() {
-        return kanbanDao.findFirst3TasksOrderedByUpdatedAtDesc();
+    public List<Task> findAllTasksOrderedByUpdatedAtDesc() {
+        return kanbanDao.findAllTasksOrderedByUpdatedAtDesc();
+    }
+
+    @Override
+    public Member findMemberById(int id) {
+        return kanbanDao.findMemberById(id);
     }
 
     @Override

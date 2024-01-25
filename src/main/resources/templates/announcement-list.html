@@ -42,9 +42,27 @@
 
         </div>
     </nav>
+    <div class="container-lg mt-5">
+        <div class="card mb-3">
+            <div class="row gx-3 d-flex align-items-center">
+                <div class="col-md-4">
+                    <img th:src="@{/svg/undraw_news.svg}" width="100%">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Announcements</h5>
+                        <p class="card-text">Explore the latest updates and important announcements on our web platform.
+                            Our announcements page is your go-to source for staying in the loop and ensuring you never
+                            miss a crucial update. Whether it's product releases, system maintenance notifications,
+                            or exciting news, you can find it all here. </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container-lg">
         <p class="fs-2 fw-bold mt-5">Announcements</p>
-        <div class="d-flex justify-content-end mt-3">
+        <div sec:authorize="hasRole('PROJECT_MANAGER')" class="d-flex justify-content-end mt-3">
             <a class="btn btn-primary" th:href="@{/announcements/show-add-announcement-form}">Add Announcement</a>
         </div>
         <table class="table">
@@ -154,7 +172,9 @@
             </div>
         </div>
     </div>
-
+    <div class="sticky-bottom bg-black text-white text-center" style="height:96px">
+        <p>© Kanban 2024</p>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">

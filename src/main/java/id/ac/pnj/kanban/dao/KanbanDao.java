@@ -11,6 +11,8 @@ public interface KanbanDao {
     void deleteEventById(int id);
     void deleteFileById(int id);
     void deleteProjectById(int id);
+
+    void deleteProjectMemberById(int projectId, int memberId);
     void deleteNoteById(int id);
     void deleteTaskById(int id);
     PagedList<Announcement> findAllAnnouncements(Pageable pageable);
@@ -35,7 +37,8 @@ public interface KanbanDao {
     List<Member> findAllMembers();
     Event findEventById(int id);
     File findFileById(int id);
-    List<Task> findFirst3TasksOrderedByUpdatedAtDesc();
+    List<Task> findAllTasksOrderedByUpdatedAtDesc();
+    Member findMemberById(int id);
 
     Member findMemberByEmail(String email);
 

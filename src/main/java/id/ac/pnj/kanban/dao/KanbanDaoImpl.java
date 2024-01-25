@@ -5,16 +5,15 @@ import com.blazebit.persistence.PagedList;
 import id.ac.pnj.kanban.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Tuple;
+
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Objects;
+
 
 @Repository
 public class KanbanDaoImpl implements KanbanDao {
@@ -53,6 +52,16 @@ public class KanbanDaoImpl implements KanbanDao {
     public void deleteProjectById(int id) {
         Project project = entityManager.find(Project.class, id);
         entityManager.remove(project);
+    }
+
+    @Override
+    @Transactional
+    public void deleteProjectMemberById(int projectId, int memberId) {
+        entityManager
+                .createNativeQuery("DELETE FROM project_member " +
+                        "WHERE project_id = :projectId AND member_id = :memberId")
+                .setParameter("projectId", projectId)
+                .setParameter("memberId", memberId).executeUpdate();
     }
 
     @Override
@@ -188,11 +197,16 @@ public class KanbanDaoImpl implements KanbanDao {
     }
 
     @Override
-    public List<Task> findFirst3TasksOrderedByUpdatedAtDesc() {
+    public List<Task> findAllTasksOrderedByUpdatedAtDesc() {
         return entityManager.createQuery("select t from Task t " +
                 "join t.project p " +
                 "join t.status s " +
-                "order by t.updatedAt desc").setMaxResults(3).getResultList();
+                "order by t.updatedAt desc").getResultList();
+    }
+
+    @Override
+    public Member findMemberById(int id) {
+        return entityManager.find(Member.class, id);
     }
 
 
@@ -411,7 +425,12 @@ public class KanbanDaoImpl implements KanbanDao {
     @Override
     @Transactional
     public void save(Member member) {
-        entityManager.merge(member);
+        Member databaseMember = entityManager.find(Member.class, member.getId());
+        if (databaseMember == null) {
+            entityManager.persist(member);
+        } else {
+            entityManager.merge(member);
+        }
     }
 
     @Override

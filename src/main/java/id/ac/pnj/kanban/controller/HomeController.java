@@ -18,7 +18,7 @@ public class HomeController {
 
     @GetMapping("/index")
     public String showDashboardPage(Model model) {
-        List<Task> tasks = kanbanService.findFirst3TasksOrderedByUpdatedAtDesc();
+        List<Task> tasks = kanbanService.findAllTasksOrderedByUpdatedAtDesc();
         model.addAttribute("tasks", tasks);
         return "index";
     }

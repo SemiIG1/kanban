@@ -10,6 +10,7 @@ public interface KanbanService {
     void deleteAnnouncementById(int id);
     void deleteEventById(int id);
     void deleteProjectById(int id);
+    void deleteProjectMemberById(int projectId, int memberId);
     void deleteNoteById(int id);
     void deleteTaskById(int id);
 
@@ -35,7 +36,8 @@ public interface KanbanService {
     List<Role> findAllRoles();
     Event findEventById(int id);
     File findFileById(int id);
-    List<Task> findFirst3TasksOrderedByUpdatedAtDesc();
+    List<Task> findAllTasksOrderedByUpdatedAtDesc();
+    Member findMemberById(int id);
     Member findMemberByName(String name);
     Note findNoteById(int id);
     Project findProjectById(int id);
