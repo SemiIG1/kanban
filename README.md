@@ -1,4 +1,4 @@
-# Kanban (WIP)
+# Kanban
 
 ---
 ## Getting Started
